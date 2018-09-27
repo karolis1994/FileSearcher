@@ -42,7 +42,6 @@ namespace SearchForFilesAndGuptaPlaces
             if (!String.IsNullOrWhiteSpace(directoryPathLbl.Text))
             {
                 String[] fileFormats = formatsTxt.Text.Split(',');
-
                 String[] searchKeywords = searchTxt.Text.Split(',');
                 gridObjects.Clear();
 
@@ -93,19 +92,32 @@ namespace SearchForFilesAndGuptaPlaces
                 {
                     if (line.ToLower().Contains(keyword))
                     {
+                        GridView view = new GridView()
+                        {
+                            SearchedText = keyword,
+                            FileName = fileName,
+                            RowNumber = lineCounter + 1
+                        };
+
                         //if format of file is "apt" get class function/window name
-                        String guptaObject = String.Empty;
                         if (isApt)
                         {
                             Boolean goBack = true;
+                            Boolean classNameFound = false;
                             Int64 backwardsCounter = lineCounter - 1;
 
                             while (goBack && backwardsCounter > 0)
                             {
+                                if (!classNameFound && (lines[backwardsCounter].Contains(".head 5 +  Function:") || lines[backwardsCounter].Contains(".head 3 +  Function:")))
+                                {
+                                    view.GuptaClassName = lines[backwardsCounter];
+                                    classNameFound = true;
+                                }
+
                                 if (lines[backwardsCounter].Contains(".head 3 +  Functional Class:") || lines[backwardsCounter].Contains(".head 1 +  "))
                                 {
                                     goBack = false;
-                                    guptaObject = lines[backwardsCounter];
+                                    view.GuptaObjectName = lines[backwardsCounter];
                                 }
 
                                 backwardsCounter--;
@@ -123,7 +135,7 @@ namespace SearchForFilesAndGuptaPlaces
                             {
                                 if (lineCounter - i >= 0)
                                 {
-                                    resultLine += lines[lineCounter - i];
+                                    resultLine += Environment.NewLine + lines[lineCounter - i];
                                 }
                             }
                             //traverse forwards
@@ -131,16 +143,16 @@ namespace SearchForFilesAndGuptaPlaces
                             {
                                 if (lineCounter + i < lines.Length)
                                 {
-                                    resultLine += lines[lineCounter + i];
+                                    resultLine += Environment.NewLine + lines[lineCounter + i];
                                 }
                             }
 
-                            AddGridObject(keyword, fileName, resultLine, lineCounter + 1, guptaObject);
+                            view.ResultText = resultLine;
                         }
                         else if (searchUpDown.Value == 1)
-                            AddGridObject(keyword, fileName, line, lineCounter + 1, guptaObject);
-                        else
-                            AddGridObject(keyword, fileName, String.Empty, lineCounter + 1, guptaObject);
+                            view.ResultText = line;
+
+                        gridObjects.Add(view);
                     }
                 }
 
@@ -155,19 +167,13 @@ namespace SearchForFilesAndGuptaPlaces
             dataGrid.Size = new Size(this.Size.Width - 43, this.Size.Height - 169);
         }
 
-
-        private void AddGridObject(String searchedText, String fileName, String resultText, Int32 rowNumber, String guptaObjectName)
-        {
-            GridView obj = new GridView() { FileName = fileName, GuptaObjectName = guptaObjectName, ResultText = resultText, RowNumber = rowNumber, SearchedText = searchedText };
-            gridObjects.Add(obj);
-        }
         private void LoadGrid()
         {
             dataGrid.Rows.Clear();
 
             foreach (GridView obj in gridObjects.OrderBy(obj => obj.SearchedText))
             {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName);
+                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName);
             }
         }
     }

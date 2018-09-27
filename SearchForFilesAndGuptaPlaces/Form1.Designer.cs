@@ -45,6 +45,7 @@
             this.TextRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -77,7 +78,8 @@
             this.FileName,
             this.TextRow,
             this.FoundInRow,
-            this.GuptaObject});
+            this.GuptaObject,
+            this.ClassName});
             this.dataGrid.Location = new System.Drawing.Point(15, 119);
             this.dataGrid.Name = "dataGrid";
             this.dataGrid.Size = new System.Drawing.Size(773, 319);
@@ -181,6 +183,11 @@
             this.GuptaObject.Name = "GuptaObject";
             this.GuptaObject.Width = 200;
             // 
+            // ClassName
+            // 
+            this.ClassName.HeaderText = "Class name";
+            this.ClassName.Name = "ClassName";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -226,6 +233,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn TextRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn FoundInRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn GuptaObject;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ClassName;
     }
 }
 
