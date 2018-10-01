@@ -13,7 +13,9 @@ namespace SearchForFilesAndGuptaPlaces
         public String SearchedText { get; set; }
         public String ResultText { get; set; }
         public String FileName { get; set; }
+        public String FilePath { get; set; }
 
         public Int32 RowNumber { get; set; }
+        public Int32 Id { get; set; }
     }
 }

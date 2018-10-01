@@ -40,12 +40,14 @@
             this.searchTxt = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.searchUpDown = new System.Windows.Forms.NumericUpDown();
+            this.openFileBtn = new System.Windows.Forms.Button();
             this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TextRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -79,10 +81,11 @@
             this.TextRow,
             this.FoundInRow,
             this.GuptaObject,
-            this.ClassName});
-            this.dataGrid.Location = new System.Drawing.Point(15, 119);
+            this.ClassName,
+            this.Id});
+            this.dataGrid.Location = new System.Drawing.Point(15, 141);
             this.dataGrid.Name = "dataGrid";
-            this.dataGrid.Size = new System.Drawing.Size(773, 319);
+            this.dataGrid.Size = new System.Drawing.Size(773, 297);
             this.dataGrid.TabIndex = 2;
             // 
             // directoryBtn
@@ -155,6 +158,16 @@
             this.searchUpDown.Size = new System.Drawing.Size(120, 20);
             this.searchUpDown.TabIndex = 11;
             // 
+            // openFileBtn
+            // 
+            this.openFileBtn.Location = new System.Drawing.Point(15, 115);
+            this.openFileBtn.Name = "openFileBtn";
+            this.openFileBtn.Size = new System.Drawing.Size(239, 23);
+            this.openFileBtn.TabIndex = 12;
+            this.openFileBtn.Text = "Open first selected file";
+            this.openFileBtn.UseVisualStyleBackColor = true;
+            this.openFileBtn.Click += new System.EventHandler(this.openFileBtn_Click);
+            // 
             // SearchedText
             // 
             this.SearchedText.HeaderText = "Searched tex";
@@ -188,11 +201,18 @@
             this.ClassName.HeaderText = "Class name";
             this.ClassName.Name = "ClassName";
             // 
+            // Id
+            // 
+            this.Id.HeaderText = "Id";
+            this.Id.Name = "Id";
+            this.Id.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.openFileBtn);
             this.Controls.Add(this.searchUpDown);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.searchLbl);
@@ -228,12 +248,14 @@
         private System.Windows.Forms.TextBox searchTxt;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown searchUpDown;
+        private System.Windows.Forms.Button openFileBtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn SearchedText;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileName;
         private System.Windows.Forms.DataGridViewTextBoxColumn TextRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn FoundInRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn GuptaObject;
         private System.Windows.Forms.DataGridViewTextBoxColumn ClassName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Id;
     }
 }
 

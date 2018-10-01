@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -21,6 +23,17 @@ namespace SearchForFilesAndGuptaPlaces
             InitializeComponent();
             gridObjects = new List<GridView>();
         }
+
+        private Int32 CurrentId;
+        private const String notepadName = "notepad.exe";
+        private const String notepadPPName = "Notepad++.exe";
+        private const String notepadPPRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++";
+        private const String guptaFunctionFunction = ".head 5 +  Function:";
+        private const String guptaTableFunction = ".head 3 +  Function:";
+        private const String guptaFunctionClass = ".head 3 +  Functional Class:";
+        private const String guptaTableClass = ".head 1 +  ";
+        private const String aptFormat = "apt";
+        private const String fileNameRegex = "[^\\\\]*$";
 
         //Choose and save chosen directory
         private void directoryBtn_Click(object sender, EventArgs e)
@@ -43,6 +56,9 @@ namespace SearchForFilesAndGuptaPlaces
             {
                 String[] fileFormats = formatsTxt.Text.Split(',');
                 String[] searchKeywords = searchTxt.Text.Split(',');
+                Boolean isApt;
+
+                CurrentId = 1;
                 gridObjects.Clear();
 
                 //Loop through all file formats
@@ -52,7 +68,7 @@ namespace SearchForFilesAndGuptaPlaces
                     String[] files = Directory.GetFiles(directoryPathLbl.Text, $"*.{format}", SearchOption.AllDirectories);
 
                     //if format is a gupta file, mark it as such
-                    Boolean isApt = format == "apt";
+                    isApt = format == aptFormat;
 
                     //loop through all files searching for our text
                     foreach (String file in files)
@@ -70,7 +86,7 @@ namespace SearchForFilesAndGuptaPlaces
         {
             String fileName = String.Empty;
 
-            Match match = Regex.Match(filePath, "[^\\\\]*$");
+            Match match = Regex.Match(filePath, fileNameRegex);
             if (match.Success)
             {
                 fileName = match.Value;
@@ -79,6 +95,7 @@ namespace SearchForFilesAndGuptaPlaces
             return fileName;
         }
 
+        //Search for text in a file
         private void SearchForText(String filePath, Boolean isApt, String[] searchKeywords)
         {
             var lines = File.ReadAllLines(filePath);
@@ -96,8 +113,12 @@ namespace SearchForFilesAndGuptaPlaces
                         {
                             SearchedText = keyword,
                             FileName = fileName,
-                            RowNumber = lineCounter + 1
+                            RowNumber = lineCounter + 1,
+                            FilePath = filePath,
+                            Id = CurrentId
                         };
+
+                        CurrentId++;
 
                         //if format of file is "apt" get class function/window name
                         if (isApt)
@@ -108,13 +129,13 @@ namespace SearchForFilesAndGuptaPlaces
 
                             while (goBack && backwardsCounter > 0)
                             {
-                                if (!classNameFound && (lines[backwardsCounter].Contains(".head 5 +  Function:") || lines[backwardsCounter].Contains(".head 3 +  Function:")))
+                                if (!classNameFound && (lines[backwardsCounter].Contains(guptaFunctionFunction) || lines[backwardsCounter].Contains(guptaTableFunction)))
                                 {
                                     view.GuptaClassName = lines[backwardsCounter];
                                     classNameFound = true;
                                 }
 
-                                if (lines[backwardsCounter].Contains(".head 3 +  Functional Class:") || lines[backwardsCounter].Contains(".head 1 +  "))
+                                if (lines[backwardsCounter].Contains(guptaFunctionClass) || lines[backwardsCounter].Contains(guptaTableClass))
                                 {
                                     goBack = false;
                                     view.GuptaObjectName = lines[backwardsCounter];
@@ -124,10 +145,11 @@ namespace SearchForFilesAndGuptaPlaces
                             }
                         }
 
-                        //Depending on how many context lines we want to get for our search result
+                        //Depending on how many context lines we want to get for our search result, collect neccessary text lines
                         if (searchUpDown.Value > 1)
                         {
                             String resultLine = String.Empty;
+                            StringBuilder sb = new StringBuilder();
                             Int32 resultLinesCounter = Convert.ToInt32(searchUpDown.Value);
 
                             //traverse backwards
@@ -135,7 +157,7 @@ namespace SearchForFilesAndGuptaPlaces
                             {
                                 if (lineCounter - i >= 0)
                                 {
-                                    resultLine += Environment.NewLine + lines[lineCounter - i];
+                                    sb.Append(Environment.NewLine + lines[lineCounter - i]);
                                 }
                             }
                             //traverse forwards
@@ -143,11 +165,11 @@ namespace SearchForFilesAndGuptaPlaces
                             {
                                 if (lineCounter + i < lines.Length)
                                 {
-                                    resultLine += Environment.NewLine + lines[lineCounter + i];
+                                    sb.Append(Environment.NewLine + lines[lineCounter + i]);
                                 }
                             }
 
-                            view.ResultText = resultLine;
+                            view.ResultText = sb.ToString();
                         }
                         else if (searchUpDown.Value == 1)
                             view.ResultText = line;
@@ -164,16 +186,48 @@ namespace SearchForFilesAndGuptaPlaces
         {
             formatsTxt.Size = new Size(this.Size.Width - 400, formatsTxt.Size.Height);
             searchTxt.Size = new Size(this.Size.Width - 240, searchTxt.Size.Height);
-            dataGrid.Size = new Size(this.Size.Width - 43, this.Size.Height - 169);
+            dataGrid.Size = new Size(this.Size.Width - 43, this.Size.Height - 191);
         }
 
+        //Load grid from gridview list
         private void LoadGrid()
         {
             dataGrid.Rows.Clear();
 
             foreach (GridView obj in gridObjects.OrderBy(obj => obj.SearchedText))
             {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName);
+                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName, obj.Id);
+            }
+        }
+
+        //Opens a file in notepad++ if its installed, or notepad if not
+        private void OpenTextFile(String filePath, Int32 lineToGoTo)
+        {
+            var nppDir = (String)Registry.GetValue(notepadPPRegistryPath, null, null);
+
+            //if Notepad++ is installed
+            if (!String.IsNullOrWhiteSpace(nppDir))
+            {
+                var nppExePath = Path.Combine(nppDir, notepadPPName);
+                var sb = new StringBuilder();
+                sb.AppendFormat("\"{0}\" -n{1}", filePath, lineToGoTo);
+                Process.Start(nppExePath, sb.ToString());
+            }
+            else
+            {
+                Process.Start(notepadName, filePath);
+            }
+            
+        }
+
+        private void openFileBtn_Click(object sender, EventArgs e)
+        {
+            if (dataGrid.SelectedRows.Count > 0)
+            {
+                Int32 id = (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+                GridView selected = gridObjects.FirstOrDefault(g => g.Id == id);
+
+                OpenTextFile(selected.FilePath, selected.RowNumber);
             }
         }
     }
