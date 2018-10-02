@@ -31,6 +31,13 @@
             this.formatsTxt = new System.Windows.Forms.TextBox();
             this.formatsLbl = new System.Windows.Forms.Label();
             this.dataGrid = new System.Windows.Forms.DataGridView();
+            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TextRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.directoryBtn = new System.Windows.Forms.Button();
             this.directoryLbl = new System.Windows.Forms.Label();
@@ -41,13 +48,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.searchUpDown = new System.Windows.Forms.NumericUpDown();
             this.openFileBtn = new System.Windows.Forms.Button();
-            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TextRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -85,8 +86,57 @@
             this.Id});
             this.dataGrid.Location = new System.Drawing.Point(15, 141);
             this.dataGrid.Name = "dataGrid";
+            this.dataGrid.ReadOnly = true;
+            this.dataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGrid.Size = new System.Drawing.Size(773, 297);
             this.dataGrid.TabIndex = 2;
+            this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentDoubleClick);
+            // 
+            // SearchedText
+            // 
+            this.SearchedText.HeaderText = "Searched tex";
+            this.SearchedText.Name = "SearchedText";
+            this.SearchedText.ReadOnly = true;
+            // 
+            // FileName
+            // 
+            this.FileName.HeaderText = "File name";
+            this.FileName.Name = "FileName";
+            this.FileName.ReadOnly = true;
+            this.FileName.Width = 200;
+            // 
+            // TextRow
+            // 
+            this.TextRow.HeaderText = "Text row";
+            this.TextRow.Name = "TextRow";
+            this.TextRow.ReadOnly = true;
+            // 
+            // FoundInRow
+            // 
+            this.FoundInRow.HeaderText = "Row where the text was found";
+            this.FoundInRow.Name = "FoundInRow";
+            this.FoundInRow.ReadOnly = true;
+            this.FoundInRow.Width = 200;
+            // 
+            // GuptaObject
+            // 
+            this.GuptaObject.HeaderText = "Gupta object";
+            this.GuptaObject.Name = "GuptaObject";
+            this.GuptaObject.ReadOnly = true;
+            this.GuptaObject.Width = 200;
+            // 
+            // ClassName
+            // 
+            this.ClassName.HeaderText = "Class name";
+            this.ClassName.Name = "ClassName";
+            this.ClassName.ReadOnly = true;
+            // 
+            // Id
+            // 
+            this.Id.HeaderText = "Id";
+            this.Id.Name = "Id";
+            this.Id.ReadOnly = true;
+            this.Id.Visible = false;
             // 
             // directoryBtn
             // 
@@ -168,44 +218,9 @@
             this.openFileBtn.UseVisualStyleBackColor = true;
             this.openFileBtn.Click += new System.EventHandler(this.openFileBtn_Click);
             // 
-            // SearchedText
+            // openFileDialog1
             // 
-            this.SearchedText.HeaderText = "Searched tex";
-            this.SearchedText.Name = "SearchedText";
-            // 
-            // FileName
-            // 
-            this.FileName.HeaderText = "File name";
-            this.FileName.Name = "FileName";
-            this.FileName.Width = 200;
-            // 
-            // TextRow
-            // 
-            this.TextRow.HeaderText = "Text row";
-            this.TextRow.Name = "TextRow";
-            // 
-            // FoundInRow
-            // 
-            this.FoundInRow.HeaderText = "Row where the text was found";
-            this.FoundInRow.Name = "FoundInRow";
-            this.FoundInRow.Width = 200;
-            // 
-            // GuptaObject
-            // 
-            this.GuptaObject.HeaderText = "Gupta object";
-            this.GuptaObject.Name = "GuptaObject";
-            this.GuptaObject.Width = 200;
-            // 
-            // ClassName
-            // 
-            this.ClassName.HeaderText = "Class name";
-            this.ClassName.Name = "ClassName";
-            // 
-            // Id
-            // 
-            this.Id.HeaderText = "Id";
-            this.Id.Name = "Id";
-            this.Id.Visible = false;
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form1
             // 
@@ -225,7 +240,7 @@
             this.Controls.Add(this.formatsLbl);
             this.Controls.Add(this.formatsTxt);
             this.Name = "Form1";
-            this.Text = "Search for text in gupta and elsewhere";
+            this.Text = "Text searcher";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).EndInit();
@@ -256,6 +271,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn GuptaObject;
         private System.Windows.Forms.DataGridViewTextBoxColumn ClassName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Id;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
 

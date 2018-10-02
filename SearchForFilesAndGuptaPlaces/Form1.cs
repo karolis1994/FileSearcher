@@ -115,7 +115,8 @@ namespace SearchForFilesAndGuptaPlaces
                             FileName = fileName,
                             RowNumber = lineCounter + 1,
                             FilePath = filePath,
-                            Id = CurrentId
+                            Id = CurrentId,
+                            IsGuptaFile = isApt
                         };
 
                         CurrentId++;
@@ -194,7 +195,11 @@ namespace SearchForFilesAndGuptaPlaces
         {
             dataGrid.Rows.Clear();
 
-            foreach (GridView obj in gridObjects.OrderBy(obj => obj.SearchedText))
+            foreach (GridView obj in gridObjects
+                .OrderBy(obj => obj.SearchedText)
+                .ThenByDescending(obj => obj.IsGuptaFile)
+                .ThenBy(obj => obj.FilePath)
+                .ThenBy(obj => obj.RowNumber))
             {
                 dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName, obj.Id);
             }
@@ -229,6 +234,13 @@ namespace SearchForFilesAndGuptaPlaces
 
                 OpenTextFile(selected.FilePath, selected.RowNumber);
             }
+        }
+
+        private void dataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            GridView selected = gridObjects.FirstOrDefault(g => g.Id == (Int32) dataGrid.Rows[e.RowIndex].Cells["Id"].Value);
+
+            OpenTextFile(selected.FilePath, selected.RowNumber);
         }
     }
 }

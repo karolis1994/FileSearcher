@@ -15,6 +15,8 @@ namespace SearchForFilesAndGuptaPlaces
         public String FileName { get; set; }
         public String FilePath { get; set; }
 
+        public Boolean IsGuptaFile { get; set; }
+
         public Int32 RowNumber { get; set; }
         public Int32 Id { get; set; }
     }
