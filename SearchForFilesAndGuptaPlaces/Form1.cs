@@ -21,7 +21,9 @@ namespace SearchForFilesAndGuptaPlaces
         public Form1()
         {
             InitializeComponent();
+
             gridObjects = new List<GridView>();
+            Icon = new Icon("Resources/if_search_b_44994.ico");
         }
 
         private Int32 CurrentId;
