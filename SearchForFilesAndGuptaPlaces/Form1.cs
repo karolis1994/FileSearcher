@@ -128,7 +128,7 @@ namespace SearchForFilesAndGuptaPlaces
                         {
                             Boolean goBack = true;
                             Boolean classNameFound = false;
-                            Int64 backwardsCounter = lineCounter - 1;
+                            Int64 backwardsCounter = lineCounter;
 
                             while (goBack && backwardsCounter > 0)
                             {
