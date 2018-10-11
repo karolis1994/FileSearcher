@@ -41,11 +41,10 @@ namespace SearchForFilesAndGuptaPlaces
         private void directoryBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            DialogResult result = folderBrowserDialog.ShowDialog();
-
-            if (result == DialogResult.OK && !String.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
+            FolderSelectDialog folderSelectorDialog = new FolderSelectDialog() { Title = "Select a folder", InitialDirectory = @"c:\" };
+            if (folderSelectorDialog.ShowDialog(IntPtr.Zero))
             {
-                directoryPathLbl.Text = folderBrowserDialog.SelectedPath;
+                directoryPathLbl.Text = folderSelectorDialog.FileName;
             }
             Cursor.Current = Cursors.Arrow;
         }
