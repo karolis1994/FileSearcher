@@ -99,88 +99,91 @@ namespace SearchForFilesAndGuptaPlaces
         //Search for text in a file
         private void SearchForText(String filePath, Boolean isApt, String[] searchKeywords)
         {
-            var lines = File.ReadAllLines(filePath);
-            String fileName = GetFileNameFromPath(filePath);
-            Int32 lineCounter = 0;
-
-            //loop through lines looking for our text and filling in the table with found results
-            foreach (String line in lines)
+            if (searchKeywords.Any(key => !String.IsNullOrWhiteSpace(key)))
             {
-                foreach (String keyword in searchKeywords)
+                var lines = File.ReadAllLines(filePath);
+                String fileName = GetFileNameFromPath(filePath);
+                Int32 lineCounter = 0;
+
+                //loop through lines looking for our text and filling in the table with found results
+                foreach (String line in lines)
                 {
-                    if (line.ToLower().Contains(keyword))
+                    foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
                     {
-                        GridView view = new GridView()
+                        if (line.ToLower().Contains(keyword))
                         {
-                            SearchedText = keyword,
-                            FileName = fileName,
-                            RowNumber = lineCounter + 1,
-                            FilePath = filePath,
-                            Id = CurrentId,
-                            IsGuptaFile = isApt
-                        };
-
-                        CurrentId++;
-
-                        //if format of file is "apt" get class function/window name
-                        if (isApt)
-                        {
-                            Boolean goBack = true;
-                            Boolean classNameFound = false;
-                            Int64 backwardsCounter = lineCounter;
-
-                            while (goBack && backwardsCounter > 0)
+                            GridView view = new GridView()
                             {
-                                if (!classNameFound && (lines[backwardsCounter].Contains(guptaFunctionFunction) || lines[backwardsCounter].Contains(guptaTableFunction)))
-                                {
-                                    view.GuptaClassName = lines[backwardsCounter];
-                                    classNameFound = true;
-                                }
+                                SearchedText = keyword,
+                                FileName = fileName,
+                                RowNumber = lineCounter + 1,
+                                FilePath = filePath,
+                                Id = CurrentId,
+                                IsGuptaFile = isApt
+                            };
 
-                                if (lines[backwardsCounter].Contains(guptaFunctionClass) || lines[backwardsCounter].Contains(guptaTableClass))
-                                {
-                                    goBack = false;
-                                    view.GuptaObjectName = lines[backwardsCounter];
-                                }
+                            CurrentId++;
 
-                                backwardsCounter--;
+                            //if format of file is "apt" get class function/window name
+                            if (isApt)
+                            {
+                                Boolean goBack = true;
+                                Boolean classNameFound = false;
+                                Int64 backwardsCounter = lineCounter;
+
+                                while (goBack && backwardsCounter > 0)
+                                {
+                                    if (!classNameFound && (lines[backwardsCounter].Contains(guptaFunctionFunction) || lines[backwardsCounter].Contains(guptaTableFunction)))
+                                    {
+                                        view.GuptaClassName = lines[backwardsCounter];
+                                        classNameFound = true;
+                                    }
+
+                                    if (lines[backwardsCounter].Contains(guptaFunctionClass) || lines[backwardsCounter].Contains(guptaTableClass))
+                                    {
+                                        goBack = false;
+                                        view.GuptaObjectName = lines[backwardsCounter];
+                                    }
+
+                                    backwardsCounter--;
+                                }
                             }
+
+                            //Depending on how many context lines we want to get for our search result, collect neccessary text lines
+                            if (searchUpDown.Value > 1)
+                            {
+                                String resultLine = String.Empty;
+                                StringBuilder sb = new StringBuilder();
+                                Int32 resultLinesCounter = Convert.ToInt32(searchUpDown.Value);
+
+                                //traverse backwards
+                                for (Int32 i = resultLinesCounter; i > 0; i--)
+                                {
+                                    if (lineCounter - i >= 0)
+                                    {
+                                        sb.Append(Environment.NewLine + lines[lineCounter - i]);
+                                    }
+                                }
+                                //traverse forwards
+                                for (Int32 i = 0; i <= resultLinesCounter; i++)
+                                {
+                                    if (lineCounter + i < lines.Length)
+                                    {
+                                        sb.Append(Environment.NewLine + lines[lineCounter + i]);
+                                    }
+                                }
+
+                                view.ResultText = sb.ToString();
+                            }
+                            else if (searchUpDown.Value == 1)
+                                view.ResultText = line;
+
+                            gridObjects.Add(view);
                         }
-
-                        //Depending on how many context lines we want to get for our search result, collect neccessary text lines
-                        if (searchUpDown.Value > 1)
-                        {
-                            String resultLine = String.Empty;
-                            StringBuilder sb = new StringBuilder();
-                            Int32 resultLinesCounter = Convert.ToInt32(searchUpDown.Value);
-
-                            //traverse backwards
-                            for (Int32 i = resultLinesCounter; i > 0; i--)
-                            {
-                                if (lineCounter - i >= 0)
-                                {
-                                    sb.Append(Environment.NewLine + lines[lineCounter - i]);
-                                }
-                            }
-                            //traverse forwards
-                            for (Int32 i = 0; i <= resultLinesCounter; i++)
-                            {
-                                if (lineCounter + i < lines.Length)
-                                {
-                                    sb.Append(Environment.NewLine + lines[lineCounter + i]);
-                                }
-                            }
-
-                            view.ResultText = sb.ToString();
-                        }
-                        else if (searchUpDown.Value == 1)
-                            view.ResultText = line;
-
-                        gridObjects.Add(view);
                     }
-                }
 
-                lineCounter++;
+                    lineCounter++;
+                }
             }
         }
 
