@@ -23,7 +23,9 @@ namespace SearchForFilesAndGuptaPlaces
             InitializeComponent();
 
             gridObjects = new List<GridView>();
-            Icon = new Icon("Resources/if_search_b_44994.ico");
+
+            if (File.Exists("Resources/if_search_b_44994.ico"))
+                Icon = new Icon("Resources/if_search_b_44994.ico");
         }
 
         private Int32 CurrentId;
