@@ -80,6 +80,9 @@ namespace SearchForFilesAndGuptaPlaces
                     }
                 }
 
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 LoadGrid();
             }
             Cursor.Current = Cursors.Arrow;
