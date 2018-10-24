@@ -44,11 +44,12 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TextRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.previewTextBox = new System.Windows.Forms.TextBox();
+            this.previewLbl = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -58,7 +59,7 @@
             this.formatsTxt.CharacterCasing = System.Windows.Forms.CharacterCasing.Lower;
             this.formatsTxt.Location = new System.Drawing.Point(372, 38);
             this.formatsTxt.Name = "formatsTxt";
-            this.formatsTxt.Size = new System.Drawing.Size(416, 20);
+            this.formatsTxt.Size = new System.Drawing.Size(830, 20);
             this.formatsTxt.TabIndex = 0;
             // 
             // formatsLbl
@@ -79,7 +80,6 @@
             this.dataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.SearchedText,
             this.FileName,
-            this.TextRow,
             this.FoundInRow,
             this.GuptaObject,
             this.ClassName,
@@ -88,9 +88,10 @@
             this.dataGrid.Name = "dataGrid";
             this.dataGrid.ReadOnly = true;
             this.dataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGrid.Size = new System.Drawing.Size(773, 297);
+            this.dataGrid.Size = new System.Drawing.Size(785, 297);
             this.dataGrid.TabIndex = 2;
             this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentDoubleClick);
+            this.dataGrid.SelectionChanged += new System.EventHandler(this.dataGrid_SelectionChanged);
             // 
             // directoryBtn
             // 
@@ -143,7 +144,7 @@
             this.searchTxt.CharacterCasing = System.Windows.Forms.CharacterCasing.Lower;
             this.searchTxt.Location = new System.Drawing.Point(212, 12);
             this.searchTxt.Name = "searchTxt";
-            this.searchTxt.Size = new System.Drawing.Size(576, 20);
+            this.searchTxt.Size = new System.Drawing.Size(990, 20);
             this.searchTxt.TabIndex = 7;
             // 
             // label1
@@ -190,12 +191,6 @@
             this.FileName.ReadOnly = true;
             this.FileName.Width = 300;
             // 
-            // TextRow
-            // 
-            this.TextRow.HeaderText = "Text row";
-            this.TextRow.Name = "TextRow";
-            this.TextRow.ReadOnly = true;
-            // 
             // FoundInRow
             // 
             this.FoundInRow.HeaderText = "Row where the text was found";
@@ -224,11 +219,31 @@
             this.Id.ReadOnly = true;
             this.Id.Visible = false;
             // 
+            // previewTextBox
+            // 
+            this.previewTextBox.Location = new System.Drawing.Point(806, 141);
+            this.previewTextBox.Multiline = true;
+            this.previewTextBox.Name = "previewTextBox";
+            this.previewTextBox.ReadOnly = true;
+            this.previewTextBox.Size = new System.Drawing.Size(396, 297);
+            this.previewTextBox.TabIndex = 13;
+            // 
+            // previewLbl
+            // 
+            this.previewLbl.AutoSize = true;
+            this.previewLbl.Location = new System.Drawing.Point(806, 125);
+            this.previewLbl.Name = "previewLbl";
+            this.previewLbl.Size = new System.Drawing.Size(119, 13);
+            this.previewLbl.TabIndex = 14;
+            this.previewLbl.Text = "Preview selected result:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1214, 448);
+            this.Controls.Add(this.previewLbl);
+            this.Controls.Add(this.previewTextBox);
             this.Controls.Add(this.openFileBtn);
             this.Controls.Add(this.searchUpDown);
             this.Controls.Add(this.label1);
@@ -269,11 +284,12 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.DataGridViewTextBoxColumn SearchedText;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TextRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn FoundInRow;
         private System.Windows.Forms.DataGridViewTextBoxColumn GuptaObject;
         private System.Windows.Forms.DataGridViewTextBoxColumn ClassName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Id;
+        private System.Windows.Forms.TextBox previewTextBox;
+        private System.Windows.Forms.Label previewLbl;
     }
 }
 

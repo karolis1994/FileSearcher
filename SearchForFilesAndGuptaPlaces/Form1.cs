@@ -194,9 +194,13 @@ namespace SearchForFilesAndGuptaPlaces
 
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            formatsTxt.Size = new Size(this.Size.Width - 400, formatsTxt.Size.Height);
-            searchTxt.Size = new Size(this.Size.Width - 240, searchTxt.Size.Height);
-            dataGrid.Size = new Size(this.Size.Width - 43, this.Size.Height - 191);
+            //formatsTxt.Size = new Size((Int32)(this.Size.Width * 0.67), formatsTxt.Size.Height);
+            //searchTxt.Size = new Size((Int32)(this.Size.Width * 0.8), searchTxt.Size.Height);
+            dataGrid.Size = new Size((Int32)(this.Size.Width * 0.638), this.Size.Height - dataGrid.Location.Y - 50);
+            previewTextBox.Size = new Size(this.Size.Width - dataGrid.Location.X - dataGrid.Size.Width - 30, dataGrid.Size.Height);
+            previewTextBox.Location = new Point(dataGrid.Location.X + dataGrid.Size.Width + 6, previewTextBox.Location.Y);
+            previewLbl.Location = new Point(previewTextBox.Location.X, previewLbl.Location.Y);
+            
         }
 
         //Load grid from gridview list
@@ -210,7 +214,7 @@ namespace SearchForFilesAndGuptaPlaces
                 .ThenBy(obj => obj.FilePath)
                 .ThenBy(obj => obj.RowNumber))
             {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.ResultText, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName, obj.Id);
+                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName, obj.Id);
             }
         }
 
@@ -250,6 +254,17 @@ namespace SearchForFilesAndGuptaPlaces
             GridView selected = gridObjects.FirstOrDefault(g => g.Id == (Int32) dataGrid.Rows[e.RowIndex].Cells["Id"].Value);
 
             OpenTextFile(selected.FilePath, selected.RowNumber);
+        }
+
+        private void dataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            // For any other operation except, StateChanged, do nothing
+            if (dataGrid.SelectedRows.Count > 0)
+            {
+                Int32 id = (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+
+                previewTextBox.Text = gridObjects.FirstOrDefault(g => g.Id == id).ResultText;
+            }
         }
     }
 }
