@@ -259,7 +259,7 @@ namespace SearchForFilesAndGuptaPlaces
         private void dataGrid_SelectionChanged(object sender, EventArgs e)
         {
             // For any other operation except, StateChanged, do nothing
-            if (dataGrid.SelectedRows.Count > 0)
+            if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)
             {
                 Int32 id = (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
 
