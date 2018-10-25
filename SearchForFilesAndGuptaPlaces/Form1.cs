@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -9,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace SearchForFilesAndGuptaPlaces
@@ -26,6 +25,10 @@ namespace SearchForFilesAndGuptaPlaces
 
             if (File.Exists("Resources/if_search_b_44994.ico"))
                 Icon = new Icon("Resources/if_search_b_44994.ico");
+
+            //Display program version in the title
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            Text = $"{Text} {version.Major}.{version.Minor}";
         }
 
         private Int32 CurrentId;
@@ -166,7 +169,7 @@ namespace SearchForFilesAndGuptaPlaces
                                 {
                                     if (lineCounter - i >= 0)
                                     {
-                                        sb.Append(Environment.NewLine + lines[lineCounter - i]);
+                                        sb.AppendLine(lines[lineCounter - i]);
                                     }
                                 }
                                 //traverse forwards
@@ -174,7 +177,7 @@ namespace SearchForFilesAndGuptaPlaces
                                 {
                                     if (lineCounter + i < lines.Length)
                                     {
-                                        sb.Append(Environment.NewLine + lines[lineCounter + i]);
+                                        sb.AppendLine(lines[lineCounter + i]);
                                     }
                                 }
 
@@ -235,7 +238,6 @@ namespace SearchForFilesAndGuptaPlaces
             {
                 Process.Start(notepadName, filePath);
             }
-            
         }
 
         private void openFileBtn_Click(object sender, EventArgs e)
