@@ -157,35 +157,6 @@ namespace SearchForFilesAndGuptaPlaces
                                 }
                             }
 
-                            //Depending on how many context lines we want to get for our search result, collect neccessary text lines
-                            if (searchUpDown.Value > 1)
-                            {
-                                String resultLine = String.Empty;
-                                StringBuilder sb = new StringBuilder();
-                                Int32 resultLinesCounter = Convert.ToInt32(searchUpDown.Value);
-
-                                //traverse backwards
-                                for (Int32 i = resultLinesCounter; i > 0; i--)
-                                {
-                                    if (lineCounter - i >= 0)
-                                    {
-                                        sb.AppendLine(lines[lineCounter - i]);
-                                    }
-                                }
-                                //traverse forwards
-                                for (Int32 i = 0; i <= resultLinesCounter; i++)
-                                {
-                                    if (lineCounter + i < lines.Length)
-                                    {
-                                        sb.AppendLine(lines[lineCounter + i]);
-                                    }
-                                }
-
-                                view.ResultText = sb.ToString();
-                            }
-                            else if (searchUpDown.Value == 1)
-                                view.ResultText = line;
-
                             gridObjects.Add(view);
                         }
                     }
@@ -240,33 +211,82 @@ namespace SearchForFilesAndGuptaPlaces
             }
         }
 
+        //Open the file after choosing the open button
         private void openFileBtn_Click(object sender, EventArgs e)
         {
             if (dataGrid.SelectedRows.Count > 0)
             {
-                Int32 id = (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
-                GridView selected = gridObjects.FirstOrDefault(g => g.Id == id);
+                GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
                 OpenTextFile(selected.FilePath, selected.RowNumber);
             }
         }
 
+        //Open the file after double clicking
         private void dataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            GridView selected = gridObjects.FirstOrDefault(g => g.Id == (Int32) dataGrid.Rows[e.RowIndex].Cells["Id"].Value);
+            GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
             OpenTextFile(selected.FilePath, selected.RowNumber);
         }
 
         private void dataGrid_SelectionChanged(object sender, EventArgs e)
         {
-            // For any other operation except, StateChanged, do nothing
-            if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)
-            {
-                Int32 id = (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+            ReloadPreviewTextBox();
+        }
 
-                previewTextBox.Text = gridObjects.FirstOrDefault(g => g.Id == id).ResultText;
+        //Reloads preview text box if rules required for it to load are correct
+        private void ReloadPreviewTextBox()
+        {
+            //If a row has been selected and we want to see a result line
+            if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)
+                previewTextBox.Text = GetResultPreview(gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID()));
+            else if (searchUpDown.Value == 0)
+                previewTextBox.Text = String.Empty;
+        }
+
+        private Int32 GetSelectedRowID()
+        {
+            return (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+        }
+
+
+        //Loads text lines from result object for preview
+        private String GetResultPreview(GridView item)
+        {
+            String result = String.Empty;
+            Int32 linesToDisplay = (Int32) searchUpDown.Value;
+
+            if (item != null)
+            {
+                //When we want to see a single line, we skip all lines until result line
+                Int32 startingLine = item.RowNumber - 1;
+
+                //if we want to see more find out how much is half of our lines and set resultRowNumber - halfOfLines to be skipped.
+                //This is done to keep the search result around the middle of preview window
+                if (linesToDisplay > 1)
+                {
+                    Decimal temp = searchUpDown.Value / 2;
+                    Int32 halfCounter = (Int32)Math.Round(temp, 0, MidpointRounding.AwayFromZero);
+                    
+                    startingLine = item.RowNumber - halfCounter;
+
+                    //If our result row number - half of preview lines is a negative number, simply set it back to 0
+                    if (startingLine < 0)
+                        startingLine = 0;
+                }
+
+                //Join the selected lines into a single string
+                result = String.Join(Environment.NewLine, File.ReadLines(item.FilePath).Skip(startingLine).Take(linesToDisplay));
             }
+
+            return result;
+        }
+
+        //Reload preview for the selected row, since we changed how many rows we want to see
+        private void searchUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            ReloadPreviewTextBox();
         }
     }
 }

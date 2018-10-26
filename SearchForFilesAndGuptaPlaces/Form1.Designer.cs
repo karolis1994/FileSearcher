@@ -31,6 +31,12 @@
             this.formatsTxt = new System.Windows.Forms.TextBox();
             this.formatsLbl = new System.Windows.Forms.Label();
             this.dataGrid = new System.Windows.Forms.DataGridView();
+            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.directoryBtn = new System.Windows.Forms.Button();
             this.directoryLbl = new System.Windows.Forms.Label();
@@ -42,12 +48,6 @@
             this.searchUpDown = new System.Windows.Forms.NumericUpDown();
             this.openFileBtn = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.previewTextBox = new System.Windows.Forms.TextBox();
             this.previewLbl = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
@@ -92,6 +92,48 @@
             this.dataGrid.TabIndex = 2;
             this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentDoubleClick);
             this.dataGrid.SelectionChanged += new System.EventHandler(this.dataGrid_SelectionChanged);
+            // 
+            // SearchedText
+            // 
+            this.SearchedText.HeaderText = "Searched tex";
+            this.SearchedText.Name = "SearchedText";
+            this.SearchedText.ReadOnly = true;
+            this.SearchedText.Width = 200;
+            // 
+            // FileName
+            // 
+            this.FileName.HeaderText = "File name";
+            this.FileName.Name = "FileName";
+            this.FileName.ReadOnly = true;
+            this.FileName.Width = 300;
+            // 
+            // FoundInRow
+            // 
+            this.FoundInRow.HeaderText = "Row where the text was found";
+            this.FoundInRow.Name = "FoundInRow";
+            this.FoundInRow.ReadOnly = true;
+            this.FoundInRow.Width = 200;
+            // 
+            // GuptaObject
+            // 
+            this.GuptaObject.HeaderText = "Gupta object";
+            this.GuptaObject.Name = "GuptaObject";
+            this.GuptaObject.ReadOnly = true;
+            this.GuptaObject.Width = 300;
+            // 
+            // ClassName
+            // 
+            this.ClassName.HeaderText = "Class name";
+            this.ClassName.Name = "ClassName";
+            this.ClassName.ReadOnly = true;
+            this.ClassName.Width = 300;
+            // 
+            // Id
+            // 
+            this.Id.HeaderText = "Id";
+            this.Id.Name = "Id";
+            this.Id.ReadOnly = true;
+            this.Id.Visible = false;
             // 
             // directoryBtn
             // 
@@ -152,16 +194,17 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(260, 91);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(191, 13);
+            this.label1.Size = new System.Drawing.Size(170, 13);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Number of context lines to add to result";
+            this.label1.Text = "Number of preview lines to display:";
             // 
             // searchUpDown
             // 
-            this.searchUpDown.Location = new System.Drawing.Point(457, 86);
+            this.searchUpDown.Location = new System.Drawing.Point(436, 86);
             this.searchUpDown.Name = "searchUpDown";
             this.searchUpDown.Size = new System.Drawing.Size(120, 20);
             this.searchUpDown.TabIndex = 11;
+            this.searchUpDown.ValueChanged += new System.EventHandler(this.searchUpDown_ValueChanged);
             // 
             // openFileBtn
             // 
@@ -176,48 +219,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // SearchedText
-            // 
-            this.SearchedText.HeaderText = "Searched tex";
-            this.SearchedText.Name = "SearchedText";
-            this.SearchedText.ReadOnly = true;
-            this.SearchedText.Width = 200;
-            // 
-            // FileName
-            // 
-            this.FileName.HeaderText = "File name";
-            this.FileName.Name = "FileName";
-            this.FileName.ReadOnly = true;
-            this.FileName.Width = 300;
-            // 
-            // FoundInRow
-            // 
-            this.FoundInRow.HeaderText = "Row where the text was found";
-            this.FoundInRow.Name = "FoundInRow";
-            this.FoundInRow.ReadOnly = true;
-            this.FoundInRow.Width = 200;
-            // 
-            // GuptaObject
-            // 
-            this.GuptaObject.HeaderText = "Gupta object";
-            this.GuptaObject.Name = "GuptaObject";
-            this.GuptaObject.ReadOnly = true;
-            this.GuptaObject.Width = 300;
-            // 
-            // ClassName
-            // 
-            this.ClassName.HeaderText = "Class name";
-            this.ClassName.Name = "ClassName";
-            this.ClassName.ReadOnly = true;
-            this.ClassName.Width = 300;
-            // 
-            // Id
-            // 
-            this.Id.HeaderText = "Id";
-            this.Id.Name = "Id";
-            this.Id.ReadOnly = true;
-            this.Id.Visible = false;
             // 
             // previewTextBox
             // 
