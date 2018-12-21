@@ -17,6 +17,8 @@ namespace SearchForFilesAndGuptaPlaces
     {
         private List<GridView> gridObjects;
 
+        enum FileType { apt, sql, other }
+
         public Form1()
         {
             InitializeComponent();
@@ -35,12 +37,12 @@ namespace SearchForFilesAndGuptaPlaces
         private const String notepadName = "notepad.exe";
         private const String notepadPPName = "Notepad++.exe";
         private const String notepadPPRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++";
-        private const String guptaFunctionFunction = ".head 5 +  Function:";
-        private const String guptaTableFunction = ".head 3 +  Function:";
-        private const String guptaFunctionClass = ".head 3 +  Functional Class:";
-        private const String guptaTableClass = ".head 1 +  ";
         private const String aptFormat = "apt";
+        private const String sqlFormat = "sql";
         private const String fileNameRegex = "[^\\\\]*$";
+        private String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
+        private String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
+        private String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
 
         //Choose and save chosen directory
         private void directoryBtn_Click(object sender, EventArgs e)
@@ -73,13 +75,18 @@ namespace SearchForFilesAndGuptaPlaces
                     //get all files of this format
                     String[] files = Directory.GetFiles(directoryPathLbl.Text, $"*.{format}", SearchOption.AllDirectories);
 
-                    //if format is a gupta file, mark it as such
-                    isApt = format == aptFormat;
+
+                    //determine format
+                    FileType fileType = FileType.other;
+                    if (format == aptFormat)
+                        fileType = FileType.apt;
+                    else if (format == sqlFormat)
+                        fileType = FileType.sql;
 
                     //loop through all files searching for our text
                     foreach (String file in files)
                     {
-                        SearchForText(file, isApt, searchKeywords);
+                        SearchForText(file, fileType, searchKeywords);
                     }
                 }
 
@@ -105,7 +112,7 @@ namespace SearchForFilesAndGuptaPlaces
         }
 
         //Search for text in a file
-        private void SearchForText(String filePath, Boolean isApt, String[] searchKeywords)
+        private void SearchForText(String filePath, FileType fileType, String[] searchKeywords)
         {
             if (searchKeywords.Any(key => !String.IsNullOrWhiteSpace(key)))
             {
@@ -114,11 +121,11 @@ namespace SearchForFilesAndGuptaPlaces
                 Int32 lineCounter = 0;
 
                 //loop through lines looking for our text and filling in the table with found results
-                foreach (String line in lines)
+                foreach (String line in lines.Select(s => s.ToLower()))
                 {
                     foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
                     {
-                        if (line.ToLower().Contains(keyword))
+                        if (line.Contains(keyword))
                         {
                             GridView view = new GridView()
                             {
@@ -127,34 +134,46 @@ namespace SearchForFilesAndGuptaPlaces
                                 RowNumber = lineCounter + 1,
                                 FilePath = filePath,
                                 Id = CurrentId,
-                                IsGuptaFile = isApt
+                                IsGuptaFile = fileType == FileType.apt
                             };
 
                             CurrentId++;
 
                             //if format of file is "apt" get class function/window name
-                            if (isApt)
+                            if (fileType == FileType.apt || fileType == FileType.sql)
                             {
                                 Boolean goBack = true;
                                 Boolean classNameFound = false;
                                 Int64 backwardsCounter = lineCounter;
 
-                                while (goBack && backwardsCounter > 0)
-                                {
-                                    if (!classNameFound && (lines[backwardsCounter].Contains(guptaFunctionFunction) || lines[backwardsCounter].Contains(guptaTableFunction)))
+                                if (fileType == FileType.apt)
+                                    while (goBack && backwardsCounter > 0)
                                     {
-                                        view.GuptaClassName = lines[backwardsCounter];
-                                        classNameFound = true;
-                                    }
+                                        if (!classNameFound && (guptaFunctions.Any(lines[backwardsCounter].Contains)))
+                                        {
+                                            view.ClassName = lines[backwardsCounter];
+                                            classNameFound = true;
+                                        }
 
-                                    if (lines[backwardsCounter].Contains(guptaFunctionClass) || lines[backwardsCounter].Contains(guptaTableClass))
+                                        if (guptaClasses.Any(lines[backwardsCounter].Contains))
+                                        {
+                                            goBack = false;
+                                            view.ObjectName = lines[backwardsCounter];
+                                        }
+
+                                        backwardsCounter--;
+                                    }
+                                else
+                                    while (goBack && backwardsCounter >= 0)
                                     {
-                                        goBack = false;
-                                        view.GuptaObjectName = lines[backwardsCounter];
-                                    }
+                                        if (sqlHeaders.Any(lines[backwardsCounter].Contains))
+                                        {
+                                            goBack = false;
+                                            view.ClassName = lines[backwardsCounter];
+                                        }
 
-                                    backwardsCounter--;
-                                }
+                                        backwardsCounter--;
+                                    }
                             }
 
                             gridObjects.Add(view);
@@ -188,7 +207,7 @@ namespace SearchForFilesAndGuptaPlaces
                 .ThenBy(obj => obj.FilePath)
                 .ThenBy(obj => obj.RowNumber))
             {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.GuptaObjectName, obj.GuptaClassName, obj.Id);
+                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
             }
         }
 
