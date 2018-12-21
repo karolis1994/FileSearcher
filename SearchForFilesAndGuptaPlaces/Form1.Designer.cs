@@ -226,7 +226,7 @@
             // 
             // ClassName
             // 
-            this.ClassName.HeaderText = "Func name";
+            this.ClassName.HeaderText = "Function name";
             this.ClassName.Name = "ClassName";
             this.ClassName.ReadOnly = true;
             this.ClassName.Width = 300;

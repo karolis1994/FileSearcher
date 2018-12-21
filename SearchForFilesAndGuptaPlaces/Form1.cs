@@ -151,14 +151,14 @@ namespace SearchForFilesAndGuptaPlaces
                                     {
                                         if (!classNameFound && (guptaFunctions.Any(lines[backwardsCounter].Contains)))
                                         {
-                                            view.ClassName = lines[backwardsCounter];
+                                            view.ClassName = parseObjectName(lines[backwardsCounter], guptaFunctions);
                                             classNameFound = true;
                                         }
 
                                         if (guptaClasses.Any(lines[backwardsCounter].Contains))
                                         {
                                             goBack = false;
-                                            view.ObjectName = lines[backwardsCounter];
+                                            view.ObjectName = parseObjectName(lines[backwardsCounter], guptaClasses);
                                         }
 
                                         backwardsCounter--;
@@ -169,7 +169,7 @@ namespace SearchForFilesAndGuptaPlaces
                                         if (sqlHeaders.Any(lines[backwardsCounter].Contains))
                                         {
                                             goBack = false;
-                                            view.ClassName = lines[backwardsCounter];
+                                            view.ClassName = parseObjectName(lines[backwardsCounter], sqlHeaders);
                                         }
 
                                         backwardsCounter--;
@@ -183,6 +183,19 @@ namespace SearchForFilesAndGuptaPlaces
                     lineCounter++;
                 }
             }
+        }
+
+        private String parseObjectName(String line, String[] keywords)
+        {
+            foreach(var k in keywords)
+            {
+                if (line.Contains(k))
+                {
+                    return line.Substring(line.IndexOf(k) + k.Length);
+                }
+            }
+
+            return line;
         }
 
         private void Form1_SizeChanged(object sender, EventArgs e)
