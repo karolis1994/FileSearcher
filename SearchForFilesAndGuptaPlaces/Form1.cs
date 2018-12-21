@@ -191,7 +191,12 @@ namespace SearchForFilesAndGuptaPlaces
             {
                 if (line.Contains(k))
                 {
-                    return line.Substring(line.IndexOf(k) + k.Length);
+                    String result = line.Substring(line.IndexOf(k) + k.Length);
+                    Int32 index = result.IndexOf('(');
+                    if (index != -1)
+                        return result.Substring(0, index);
+
+                    return result;
                 }
             }
 
