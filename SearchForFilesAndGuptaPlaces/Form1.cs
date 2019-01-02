@@ -190,10 +190,11 @@ namespace SearchForFilesAndGuptaPlaces
                 }
 
                 //Add results to the final list
-                lock (gridObjects)
-                {
-                    gridObjects.AddRange(localResults);
-                }
+                if (localResults.Count > 0)
+                    lock (gridObjects)
+                    {
+                        gridObjects.AddRange(localResults);
+                    }
             }
         }
 
