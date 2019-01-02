@@ -10,14 +10,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace SearchForFilesAndGuptaPlaces
 {
+    public enum FileType { apt, sql, other }
+
     public partial class Form1 : Form
     {
         private List<GridView> gridObjects;
-
-        enum FileType { apt, sql, other }
 
         public Form1()
         {
@@ -64,6 +65,7 @@ namespace SearchForFilesAndGuptaPlaces
             {
                 String[] fileFormats = formatsTxt.Text.Split(',');
                 String[] searchKeywords = searchTxt.Text.Split(',');
+                List<FileView> files = new List<FileView>();
                 Boolean isApt;
 
                 CurrentId = 1;
@@ -72,10 +74,6 @@ namespace SearchForFilesAndGuptaPlaces
                 //Loop through all file formats
                 foreach (String format in fileFormats)
                 {
-                    //get all files of this format
-                    String[] files = Directory.GetFiles(directoryPathLbl.Text, $"*.{format}", SearchOption.AllDirectories);
-
-
                     //determine format
                     FileType fileType = FileType.other;
                     if (format == aptFormat)
@@ -83,12 +81,19 @@ namespace SearchForFilesAndGuptaPlaces
                     else if (format == sqlFormat)
                         fileType = FileType.sql;
 
-                    //loop through all files searching for our text
-                    foreach (String file in files)
-                    {
-                        SearchForText(file, fileType, searchKeywords);
-                    }
+                    //get all files of this format
+                    foreach (String filePath in Directory.GetFiles(directoryPathLbl.Text, $"*.{format}", SearchOption.AllDirectories))
+                        files.Add(new FileView() { FilePath = filePath, FileType = fileType });
                 }
+
+                //TODO: call tasks
+                List<Task> tasks = new List<Task>();
+                foreach (FileView file in files)
+                {
+                    tasks.Add(Task.Factory.StartNew(() => this.FindTextInFile(file, searchKeywords)));
+                }
+
+                Task.WaitAll(tasks.ToArray());
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -111,13 +116,14 @@ namespace SearchForFilesAndGuptaPlaces
             return fileName;
         }
 
-        //Search for text in a file
-        private void SearchForText(String filePath, FileType fileType, String[] searchKeywords)
+        private void FindTextInFile(FileView file, String[] searchKeywords)
         {
+            List<GridView> localResults = new List<GridView>();
+
             if (searchKeywords.Any(key => !String.IsNullOrWhiteSpace(key)))
             {
-                var lines = File.ReadAllLines(filePath);
-                String fileName = GetFileNameFromPath(filePath);
+                var lines = File.ReadAllLines(file.FilePath);
+                String fileName = GetFileNameFromPath(file.FilePath);
                 Int32 lineCounter = 0;
 
                 //loop through lines looking for our text and filling in the table with found results
@@ -132,21 +138,21 @@ namespace SearchForFilesAndGuptaPlaces
                                 SearchedText = keyword,
                                 FileName = fileName,
                                 RowNumber = lineCounter + 1,
-                                FilePath = filePath,
+                                FilePath = file.FilePath,
                                 Id = CurrentId,
-                                IsGuptaFile = fileType == FileType.apt
+                                IsGuptaFile = file.FileType == FileType.apt
                             };
 
                             CurrentId++;
 
                             //if format of file is "apt" get class function/window name
-                            if (fileType == FileType.apt || fileType == FileType.sql)
+                            if (file.FileType == FileType.apt || file.FileType == FileType.sql)
                             {
                                 Boolean goBack = true;
                                 Boolean classNameFound = false;
                                 Int64 backwardsCounter = lineCounter;
 
-                                if (fileType == FileType.apt)
+                                if (file.FileType == FileType.apt)
                                     while (goBack && backwardsCounter > 0)
                                     {
                                         if (!classNameFound && (guptaFunctions.Any(lines[backwardsCounter].Contains)))
@@ -176,11 +182,17 @@ namespace SearchForFilesAndGuptaPlaces
                                     }
                             }
 
-                            gridObjects.Add(view);
+                            localResults.Add(view);
                         }
                     }
 
                     lineCounter++;
+                }
+
+                //Add results to the final list
+                lock (gridObjects)
+                {
+                    gridObjects.AddRange(localResults);
                 }
             }
         }
