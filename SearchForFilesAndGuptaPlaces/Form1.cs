@@ -32,6 +32,9 @@ namespace SearchForFilesAndGuptaPlaces
             //Display program version in the title
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
             Text = $"{Text} {version.Major}.{version.Minor}";
+
+            formatsTxt.Text = defaultFormats;
+            this.ActiveControl = searchTxt;
         }
 
         private Int32 CurrentId;
@@ -41,11 +44,16 @@ namespace SearchForFilesAndGuptaPlaces
         private const String aptFormat = "apt";
         private const String sqlFormat = "sql";
         private const String fileNameRegex = "[^\\\\]*$";
+        private const String defaultFormats = "sql,apt";
         private String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
         private String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
         private String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
 
-        //Choose and save chosen directory
+        /// <summary>
+        /// Choose and save chosen directory
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void directoryBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
@@ -56,8 +64,11 @@ namespace SearchForFilesAndGuptaPlaces
             }
             Cursor.Current = Cursors.Arrow;
         }
-
-        //Search for input text across all files with chosen formats inside our chosen directory
+        /// <summary>
+        /// Search for input text across all files with chosen formats inside our chosen directory
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void searchBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
@@ -102,20 +113,86 @@ namespace SearchForFilesAndGuptaPlaces
             }
             Cursor.Current = Cursors.Arrow;
         }
-
-        private String GetFileNameFromPath(String filePath)
+        /// <summary>
+        /// Resize result boxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            String fileName = String.Empty;
+            //formatsTxt.Size = new Size((Int32)(this.Size.Width * 0.67), formatsTxt.Size.Height);
+            //searchTxt.Size = new Size((Int32)(this.Size.Width * 0.8), searchTxt.Size.Height);
+            dataGrid.Size = new Size((Int32)(this.Size.Width * 0.638), this.Size.Height - dataGrid.Location.Y - 50);
+            previewTextBox.Size = new Size(this.Size.Width - dataGrid.Location.X - dataGrid.Size.Width - 30, dataGrid.Size.Height);
+            previewTextBox.Location = new Point(dataGrid.Location.X + dataGrid.Size.Width + 6, previewTextBox.Location.Y);
+            previewLbl.Location = new Point(previewTextBox.Location.X, previewLbl.Location.Y);
+            
+        }
+        /// <summary>
+        /// Load grid from gridview list
+        /// </summary>
+        private void LoadGrid()
+        {
+            dataGrid.Rows.Clear();
 
-            Match match = Regex.Match(filePath, fileNameRegex);
-            if (match.Success)
+            foreach (GridView obj in gridObjects
+                .OrderBy(obj => obj.SearchedText)
+                .ThenByDescending(obj => obj.IsGuptaFile)
+                .ThenBy(obj => obj.FilePath)
+                .ThenBy(obj => obj.RowNumber))
             {
-                fileName = match.Value;
+                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
             }
+        }
+        /// <summary>
+        /// Open the file after choosing the open button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void openFileBtn_Click(object sender, EventArgs e)
+        {
+            if (dataGrid.SelectedRows.Count > 0)
+            {
+                GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
-            return fileName;
+                OpenTextFile(selected.FilePath, selected.RowNumber);
+            }
+        }
+        /// <summary>
+        /// Open the file after double clicking
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
+
+            OpenTextFile(selected.FilePath, selected.RowNumber);
+        }
+        /// <summary>
+        /// On grid row selected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            ReloadPreviewTextBox();
+        }
+        /// <summary>
+        /// Reload preview for the selected row, since we changed how many rows we want to see
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void searchUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            ReloadPreviewTextBox();
         }
 
+        /// <summary>
+        /// Search the file for keywords and load all of the results into gridObjects list
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="searchKeywords"></param>
         private void FindTextInFile(FileView file, String[] searchKeywords)
         {
             List<GridView> localResults = new List<GridView>();
@@ -197,52 +274,11 @@ namespace SearchForFilesAndGuptaPlaces
                     }
             }
         }
-
-        private String parseObjectName(String line, String[] keywords)
-        {
-            foreach(var k in keywords)
-            {
-                if (line.Contains(k))
-                {
-                    String result = line.Substring(line.IndexOf(k) + k.Length);
-                    Int32 index = result.IndexOf('(');
-                    if (index != -1)
-                        return result.Substring(0, index);
-
-                    return result;
-                }
-            }
-
-            return line;
-        }
-
-        private void Form1_SizeChanged(object sender, EventArgs e)
-        {
-            //formatsTxt.Size = new Size((Int32)(this.Size.Width * 0.67), formatsTxt.Size.Height);
-            //searchTxt.Size = new Size((Int32)(this.Size.Width * 0.8), searchTxt.Size.Height);
-            dataGrid.Size = new Size((Int32)(this.Size.Width * 0.638), this.Size.Height - dataGrid.Location.Y - 50);
-            previewTextBox.Size = new Size(this.Size.Width - dataGrid.Location.X - dataGrid.Size.Width - 30, dataGrid.Size.Height);
-            previewTextBox.Location = new Point(dataGrid.Location.X + dataGrid.Size.Width + 6, previewTextBox.Location.Y);
-            previewLbl.Location = new Point(previewTextBox.Location.X, previewLbl.Location.Y);
-            
-        }
-
-        //Load grid from gridview list
-        private void LoadGrid()
-        {
-            dataGrid.Rows.Clear();
-
-            foreach (GridView obj in gridObjects
-                .OrderBy(obj => obj.SearchedText)
-                .ThenByDescending(obj => obj.IsGuptaFile)
-                .ThenBy(obj => obj.FilePath)
-                .ThenBy(obj => obj.RowNumber))
-            {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
-            }
-        }
-
-        //Opens a file in notepad++ if its installed, or notepad if not
+        /// <summary>
+        /// Opens a file in notepad++ if its installed, or notepad if not
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="lineToGoTo"></param>
         private void OpenTextFile(String filePath, Int32 lineToGoTo)
         {
             var nppDir = (String)Registry.GetValue(notepadPPRegistryPath, null, null);
@@ -260,32 +296,9 @@ namespace SearchForFilesAndGuptaPlaces
                 Process.Start(notepadName, filePath);
             }
         }
-
-        //Open the file after choosing the open button
-        private void openFileBtn_Click(object sender, EventArgs e)
-        {
-            if (dataGrid.SelectedRows.Count > 0)
-            {
-                GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
-
-                OpenTextFile(selected.FilePath, selected.RowNumber);
-            }
-        }
-
-        //Open the file after double clicking
-        private void dataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
-
-            OpenTextFile(selected.FilePath, selected.RowNumber);
-        }
-
-        private void dataGrid_SelectionChanged(object sender, EventArgs e)
-        {
-            ReloadPreviewTextBox();
-        }
-
-        //Reloads preview text box if rules required for it to load are correct
+        /// <summary>
+        /// Reloads preview text box if rules required for it to load are correct
+        /// </summary>
         private void ReloadPreviewTextBox()
         {
             //If a row has been selected and we want to see a result line
@@ -294,18 +307,55 @@ namespace SearchForFilesAndGuptaPlaces
             else if (searchUpDown.Value == 0)
                 previewTextBox.Text = String.Empty;
         }
-
-        private Int32 GetSelectedRowID()
+        /// <summary>
+        /// Parse file path and return 
+        /// </summary>
+        /// <param name="filePath">Path to the file</param>
+        /// <returns>File name</returns>
+        private String GetFileNameFromPath(String filePath)
         {
-            return (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+            String fileName = String.Empty;
+
+            Match match = Regex.Match(filePath, fileNameRegex);
+            if (match.Success)
+            {
+                fileName = match.Value;
+            }
+
+            return fileName;
         }
+        /// <summary>
+        /// Parses line of text and shortens it taking away the keywords
+        /// </summary>
+        /// <param name="line">Line of text</param>
+        /// <param name="keywords">Keywords matching function/method/procedure... names</param>
+        /// <returns></returns>
+        private String parseObjectName(String line, String[] keywords)
+        {
+            foreach(var k in keywords)
+            {
+                if (line.Contains(k))
+                {
+                    String result = line.Substring(line.IndexOf(k) + k.Length);
+                    Int32 index = result.IndexOf('(');
+                    if (index != -1)
+                        return result.Substring(0, index);
 
+                    return result;
+                }
+            }
 
-        //Loads text lines from result object for preview
+            return line;
+        }
+        /// <summary>
+        /// Loads text lines from result object for preview
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private String GetResultPreview(GridView item)
         {
             String result = String.Empty;
-            Int32 linesToDisplay = (Int32) searchUpDown.Value;
+            Int32 linesToDisplay = (Int32)searchUpDown.Value;
 
             if (item != null)
             {
@@ -318,7 +368,7 @@ namespace SearchForFilesAndGuptaPlaces
                 {
                     Decimal temp = searchUpDown.Value / 2;
                     Int32 halfCounter = (Int32)Math.Round(temp, 0, MidpointRounding.AwayFromZero);
-                    
+
                     startingLine = item.RowNumber - halfCounter;
 
                     //If our result row number - half of preview lines is a negative number, simply set it back to 0
@@ -332,11 +382,15 @@ namespace SearchForFilesAndGuptaPlaces
 
             return result;
         }
-
-        //Reload preview for the selected row, since we changed how many rows we want to see
-        private void searchUpDown_ValueChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Returns the ID of first selected row object
+        /// </summary>
+        /// <returns>Id of selected row object</returns>
+        private Int32 GetSelectedRowID()
         {
-            ReloadPreviewTextBox();
+            return (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
         }
+
+
     }
 }

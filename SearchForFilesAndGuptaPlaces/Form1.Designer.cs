@@ -31,6 +31,12 @@
             this.formatsTxt = new System.Windows.Forms.TextBox();
             this.formatsLbl = new System.Windows.Forms.Label();
             this.dataGrid = new System.Windows.Forms.DataGridView();
+            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.directoryBtn = new System.Windows.Forms.Button();
             this.directoryLbl = new System.Windows.Forms.Label();
@@ -44,12 +50,6 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.previewTextBox = new System.Windows.Forms.TextBox();
             this.previewLbl = new System.Windows.Forms.Label();
-            this.SearchedText = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FoundInRow = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.GuptaObject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ClassName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -92,6 +92,48 @@
             this.dataGrid.TabIndex = 2;
             this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentDoubleClick);
             this.dataGrid.SelectionChanged += new System.EventHandler(this.dataGrid_SelectionChanged);
+            // 
+            // SearchedText
+            // 
+            this.SearchedText.HeaderText = "Searched tex";
+            this.SearchedText.Name = "SearchedText";
+            this.SearchedText.ReadOnly = true;
+            this.SearchedText.Width = 200;
+            // 
+            // FileName
+            // 
+            this.FileName.HeaderText = "File name";
+            this.FileName.Name = "FileName";
+            this.FileName.ReadOnly = true;
+            this.FileName.Width = 300;
+            // 
+            // FoundInRow
+            // 
+            this.FoundInRow.HeaderText = "Row where the text was found";
+            this.FoundInRow.Name = "FoundInRow";
+            this.FoundInRow.ReadOnly = true;
+            this.FoundInRow.Width = 200;
+            // 
+            // GuptaObject
+            // 
+            this.GuptaObject.HeaderText = "Gupta object";
+            this.GuptaObject.Name = "GuptaObject";
+            this.GuptaObject.ReadOnly = true;
+            this.GuptaObject.Width = 300;
+            // 
+            // ClassName
+            // 
+            this.ClassName.HeaderText = "Function name";
+            this.ClassName.Name = "ClassName";
+            this.ClassName.ReadOnly = true;
+            this.ClassName.Width = 300;
+            // 
+            // Id
+            // 
+            this.Id.HeaderText = "Id";
+            this.Id.Name = "Id";
+            this.Id.ReadOnly = true;
+            this.Id.Visible = false;
             // 
             // directoryBtn
             // 
@@ -195,48 +237,6 @@
             this.previewLbl.Size = new System.Drawing.Size(119, 13);
             this.previewLbl.TabIndex = 14;
             this.previewLbl.Text = "Preview selected result:";
-            // 
-            // SearchedText
-            // 
-            this.SearchedText.HeaderText = "Searched tex";
-            this.SearchedText.Name = "SearchedText";
-            this.SearchedText.ReadOnly = true;
-            this.SearchedText.Width = 200;
-            // 
-            // FileName
-            // 
-            this.FileName.HeaderText = "File name";
-            this.FileName.Name = "FileName";
-            this.FileName.ReadOnly = true;
-            this.FileName.Width = 300;
-            // 
-            // FoundInRow
-            // 
-            this.FoundInRow.HeaderText = "Row where the text was found";
-            this.FoundInRow.Name = "FoundInRow";
-            this.FoundInRow.ReadOnly = true;
-            this.FoundInRow.Width = 200;
-            // 
-            // GuptaObject
-            // 
-            this.GuptaObject.HeaderText = "Gupta object";
-            this.GuptaObject.Name = "GuptaObject";
-            this.GuptaObject.ReadOnly = true;
-            this.GuptaObject.Width = 300;
-            // 
-            // ClassName
-            // 
-            this.ClassName.HeaderText = "Function name";
-            this.ClassName.Name = "ClassName";
-            this.ClassName.ReadOnly = true;
-            this.ClassName.Width = 300;
-            // 
-            // Id
-            // 
-            this.Id.HeaderText = "Id";
-            this.Id.Name = "Id";
-            this.Id.ReadOnly = true;
-            this.Id.Visible = false;
             // 
             // Form1
             // 
