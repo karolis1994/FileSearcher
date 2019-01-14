@@ -97,14 +97,7 @@ namespace SearchForFilesAndGuptaPlaces
                         files.Add(new FileView() { FilePath = filePath, FileType = fileType });
                 }
 
-                //TODO: call tasks
-                List<Task> tasks = new List<Task>();
-                foreach (FileView file in files)
-                {
-                    tasks.Add(Task.Factory.StartNew(() => this.FindTextInFile(file, searchKeywords)));
-                }
-
-                Task.WaitAll(tasks.ToArray());
+                Parallel.ForEach(files, i => FindTextInFile(i, searchKeywords));
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
