@@ -242,10 +242,10 @@ namespace SearchForFilesAndGuptaPlaces
                                 else
                                     while (goBack && backwardsCounter >= 0)
                                     {
-                                        if (sqlHeaders.Any(lines[backwardsCounter].Contains))
+                                        if (sqlHeaders.Any(lines[backwardsCounter].ToUpper().Contains))
                                         {
                                             goBack = false;
-                                            view.ClassName = parseObjectName(lines[backwardsCounter], sqlHeaders);
+                                            view.ClassName = parseObjectName(lines[backwardsCounter], sqlHeaders, true);
                                         }
 
                                         backwardsCounter--;
@@ -322,14 +322,17 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="line">Line of text</param>
         /// <param name="keywords">Keywords matching function/method/procedure... names</param>
+        /// <param name="caseInsensitive">If true, turns the line to uppercase when comparing</param>
         /// <returns></returns>
-        private String parseObjectName(String line, String[] keywords)
+        private String parseObjectName(String line, String[] keywords, Boolean caseInsensitive = false)
         {
+            String tempLine = caseInsensitive ? line.ToUpper() : line;
+
             foreach(var k in keywords)
             {
-                if (line.Contains(k))
+                if (tempLine.Contains(k))
                 {
-                    String result = line.Substring(line.IndexOf(k) + k.Length);
+                    String result = line.Substring(tempLine.IndexOf(k) + k.Length);
                     Int32 index = result.IndexOf('(');
                     if (index != -1)
                         return result.Substring(0, index);
