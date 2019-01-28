@@ -75,7 +75,12 @@ namespace SearchForFilesAndGuptaPlaces
             if (!String.IsNullOrWhiteSpace(directoryPathLbl.Text))
             {
                 String[] fileFormats = formatsTxt.Text.Split(',');
-                String[] searchKeywords = searchTxt.Text.Split(',');
+                String[] searchKeywords;
+                if (separatorTextBox.Text.Length == 1)
+                    searchKeywords = searchTxt.Text.Split(separatorTextBox.Text[0]);
+                else
+                    searchKeywords = new String[] { searchTxt.Text };
+
                 List<FileView> files = new List<FileView>();
                 Boolean isApt;
 

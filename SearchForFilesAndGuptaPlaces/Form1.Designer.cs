@@ -50,6 +50,8 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.previewTextBox = new System.Windows.Forms.TextBox();
             this.previewLbl = new System.Windows.Forms.Label();
+            this.separatorTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchUpDown)).BeginInit();
             this.SuspendLayout();
@@ -177,16 +179,16 @@
             this.searchLbl.AutoSize = true;
             this.searchLbl.Location = new System.Drawing.Point(12, 15);
             this.searchLbl.Name = "searchLbl";
-            this.searchLbl.Size = new System.Drawing.Size(194, 13);
+            this.searchLbl.Size = new System.Drawing.Size(93, 13);
             this.searchLbl.TabIndex = 8;
-            this.searchLbl.Text = "Text to search for separated by comma:";
+            this.searchLbl.Text = "Text to search for:";
             // 
             // searchTxt
             // 
             this.searchTxt.CharacterCasing = System.Windows.Forms.CharacterCasing.Lower;
-            this.searchTxt.Location = new System.Drawing.Point(212, 12);
+            this.searchTxt.Location = new System.Drawing.Point(111, 12);
             this.searchTxt.Name = "searchTxt";
-            this.searchTxt.Size = new System.Drawing.Size(990, 20);
+            this.searchTxt.Size = new System.Drawing.Size(977, 20);
             this.searchTxt.TabIndex = 7;
             // 
             // label1
@@ -238,11 +240,31 @@
             this.previewLbl.TabIndex = 14;
             this.previewLbl.Text = "Preview selected result:";
             // 
+            // separatorTextBox
+            // 
+            this.separatorTextBox.Location = new System.Drawing.Point(1156, 12);
+            this.separatorTextBox.MaxLength = 1;
+            this.separatorTextBox.Name = "separatorTextBox";
+            this.separatorTextBox.Size = new System.Drawing.Size(42, 20);
+            this.separatorTextBox.TabIndex = 15;
+            this.separatorTextBox.Text = ",";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(1094, 15);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(56, 13);
+            this.label2.TabIndex = 16;
+            this.label2.Text = "Separator:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1214, 448);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.separatorTextBox);
             this.Controls.Add(this.previewLbl);
             this.Controls.Add(this.previewTextBox);
             this.Controls.Add(this.openFileBtn);
@@ -291,6 +313,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn GuptaObject;
         private System.Windows.Forms.DataGridViewTextBoxColumn ClassName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Id;
+        private System.Windows.Forms.TextBox separatorTextBox;
+        private System.Windows.Forms.Label label2;
     }
 }
 
