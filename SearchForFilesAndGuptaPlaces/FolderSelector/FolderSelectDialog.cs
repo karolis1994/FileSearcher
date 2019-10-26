@@ -8,28 +8,29 @@ using System.Windows.Forms;
 
 namespace SearchForFilesAndGuptaPlaces
 {
-	/// <summary>
-	/// Wraps System.Windows.Forms.OpenFileDialog to make it present
-	/// a vista-style dialog.
-	/// </summary>
-	public class FolderSelectDialog
+    /// <summary>
+    /// Wraps System.Windows.Forms.OpenFileDialog to make it present
+    /// a vista-style dialog.
+    /// </summary>
+    public class FolderSelectDialog
 	{
-		// Wrapped dialog
-		System.Windows.Forms.OpenFileDialog ofd = null;
+        // Wrapped dialog
+        readonly System.Windows.Forms.OpenFileDialog ofd = null;
 
 		/// <summary>
 		/// Default constructor
 		/// </summary>
 		public FolderSelectDialog()
 		{
-			ofd = new System.Windows.Forms.OpenFileDialog();
-
-			ofd.Filter = "Folders|\n";
-			ofd.AddExtension = false;
-			ofd.CheckFileExists = false;
-			ofd.DereferenceLinks = true;
-			ofd.Multiselect = false;
-		}
+            ofd = new System.Windows.Forms.OpenFileDialog
+            {
+                Filter = "Folders|\n",
+                AddExtension = false,
+                CheckFileExists = false,
+                DereferenceLinks = true,
+                Multiselect = false
+            };
+        }
 
 		#region Properties
 
@@ -48,7 +49,7 @@ namespace SearchForFilesAndGuptaPlaces
 		public string Title
 		{
 			get { return ofd.Title; }
-			set { ofd.Title = value == null ? "Select a folder" : value; }
+			set { ofd.Title = value ?? "Select a folder"; }
 		}
 
 		/// <summary>
@@ -59,15 +60,15 @@ namespace SearchForFilesAndGuptaPlaces
 			get { return ofd.FileName; }
 		}
 
-		#endregion
+        #endregion
 
-		#region Methods
+        #region Methods
 
-		/// <summary>
-		/// Shows the dialog
-		/// </summary>
-		/// <returns>True if the user presses OK else false</returns>
-		public bool ShowDialog()
+        /// <summary>
+        /// Shows the dialog
+        /// </summary>
+        /// <returns>True if the user presses OK else false</returns>
+        public bool ShowDialog()
 		{
 			return ShowDialog(IntPtr.Zero);
 		}
@@ -87,37 +88,39 @@ namespace SearchForFilesAndGuptaPlaces
 
 				uint num = 0;
 				Type typeIFileDialog = r.GetType("FileDialogNative.IFileDialog");
-				object dialog = r.Call(ofd, "CreateVistaDialog");
-				r.Call(ofd, "OnBeforeVistaDialog", dialog);
+				object dialog = Reflector.Call(ofd, "CreateVistaDialog");
+                Reflector.Call(ofd, "OnBeforeVistaDialog", dialog);
 
-				uint options = (uint)r.CallAs(typeof(System.Windows.Forms.FileDialog), ofd, "GetOptions");
+				uint options = (uint)Reflector.CallAs(typeof(System.Windows.Forms.FileDialog), ofd, "GetOptions");
 				options |= (uint)r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
-				r.CallAs(typeIFileDialog, dialog, "SetOptions", options);
+                Reflector.CallAs(typeIFileDialog, dialog, "SetOptions", options);
 
 				object pfde = r.New("FileDialog.VistaDialogEvents", ofd);
 				object[] parameters = new object[] { pfde, num };
-				r.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
+                Reflector.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
 				num = (uint)parameters[1];
 				try
 				{
-					int num2 = (int)r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
+					int num2 = (int)Reflector.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
 					flag = 0 == num2;
 				}
 				finally
 				{
-					r.CallAs(typeIFileDialog, dialog, "Unadvise", num);
+					Reflector.CallAs(typeIFileDialog, dialog, "Unadvise", num);
 					GC.KeepAlive(pfde);
 				}
 			}
 			else
 			{
-				var fbd = new FolderBrowserDialog();
-				fbd.Description = this.Title;
-				fbd.SelectedPath = this.InitialDirectory;
-				fbd.ShowNewFolderButton = false;
-				if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
+                var fbd = new FolderBrowserDialog
+                {
+                    Description = this.Title,
+                    SelectedPath = this.InitialDirectory,
+                    ShowNewFolderButton = false
+                };
+                if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
 				ofd.FileName = fbd.SelectedPath;
-				flag = true;
+                flag = true;
 			}
 
 			return flag;
@@ -148,7 +151,7 @@ namespace SearchForFilesAndGuptaPlaces
 			get { return _hwnd; }
 		}
 
-		private IntPtr _hwnd;
+		private readonly IntPtr _hwnd;
 	}
 
 }

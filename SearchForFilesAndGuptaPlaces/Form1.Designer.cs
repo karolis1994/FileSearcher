@@ -92,8 +92,8 @@
             this.dataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGrid.Size = new System.Drawing.Size(785, 297);
             this.dataGrid.TabIndex = 2;
-            this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentDoubleClick);
-            this.dataGrid.SelectionChanged += new System.EventHandler(this.dataGrid_SelectionChanged);
+            this.dataGrid.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGrid_CellContentDoubleClick);
+            this.dataGrid.SelectionChanged += new System.EventHandler(this.DataGrid_SelectionChanged);
             // 
             // SearchedText
             // 
@@ -145,7 +145,7 @@
             this.directoryBtn.TabIndex = 3;
             this.directoryBtn.Text = "Choose directory to browse";
             this.directoryBtn.UseVisualStyleBackColor = true;
-            this.directoryBtn.Click += new System.EventHandler(this.directoryBtn_Click);
+            this.directoryBtn.Click += new System.EventHandler(this.DirectoryBtn_Click);
             // 
             // directoryLbl
             // 
@@ -172,7 +172,7 @@
             this.searchBtn.TabIndex = 6;
             this.searchBtn.Text = "Search";
             this.searchBtn.UseVisualStyleBackColor = true;
-            this.searchBtn.Click += new System.EventHandler(this.searchBtn_Click);
+            this.searchBtn.Click += new System.EventHandler(this.SearchBtn_Click);
             // 
             // searchLbl
             // 
@@ -185,7 +185,7 @@
             // 
             // searchTxt
             // 
-            this.searchTxt.CharacterCasing = System.Windows.Forms.CharacterCasing.Lower;
+            this.searchTxt.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.searchTxt.Location = new System.Drawing.Point(111, 12);
             this.searchTxt.Name = "searchTxt";
             this.searchTxt.Size = new System.Drawing.Size(977, 20);
@@ -206,7 +206,7 @@
             this.searchUpDown.Name = "searchUpDown";
             this.searchUpDown.Size = new System.Drawing.Size(120, 20);
             this.searchUpDown.TabIndex = 11;
-            this.searchUpDown.ValueChanged += new System.EventHandler(this.searchUpDown_ValueChanged);
+            this.searchUpDown.ValueChanged += new System.EventHandler(this.SearchUpDown_ValueChanged);
             // 
             // openFileBtn
             // 
@@ -216,7 +216,7 @@
             this.openFileBtn.TabIndex = 12;
             this.openFileBtn.Text = "Open first selected file";
             this.openFileBtn.UseVisualStyleBackColor = true;
-            this.openFileBtn.Click += new System.EventHandler(this.openFileBtn_Click);
+            this.openFileBtn.Click += new System.EventHandler(this.OpenFileBtn_Click);
             // 
             // openFileDialog1
             // 

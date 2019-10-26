@@ -15,8 +15,8 @@ namespace SearchForFilesAndGuptaPlaces
 	{
 		#region variables
 
-		string m_ns;
-		Assembly m_asmb;
+		readonly string m_ns;
+		readonly Assembly m_asmb;
 
 		#endregion
 
@@ -41,7 +41,7 @@ namespace SearchForFilesAndGuptaPlaces
 			m_asmb = null;
 			foreach (AssemblyName aN in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
 			{
-				if (aN.FullName.StartsWith(an))
+				if (aN.FullName.StartsWith(an, StringComparison.InvariantCulture))
 				{
 					m_asmb = Assembly.Load(aN);
 					break;
@@ -86,7 +86,8 @@ namespace SearchForFilesAndGuptaPlaces
 			foreach (ConstructorInfo ci in ctorInfos) {
 				try {
 					return ci.Invoke(parameters);
-				} catch { }
+				}
+				catch { }
 			}
 
 			return null;
@@ -95,74 +96,74 @@ namespace SearchForFilesAndGuptaPlaces
 		/// <summary>
 		/// Calls method 'func' on object 'obj' passing parameters 'parameters'
 		/// </summary>
-		/// <param name="obj">The object on which to excute function 'func'</param>
+		/// <param name="objct">The object on which to excute function 'func'</param>
 		/// <param name="func">The function to execute</param>
 		/// <param name="parameters">The parameters to pass to function 'func'</param>
 		/// <returns>The result of the function invocation</returns>
-		public object Call(object obj, string func, params object[] parameters)
+		public static object Call(object objct, string func, params object[] parameters)
 		{
-			return Call2(obj, func, parameters);
+			return Call2(objct, func, parameters);
 		}
 
 		/// <summary>
 		/// Calls method 'func' on object 'obj' passing parameters 'parameters'
 		/// </summary>
-		/// <param name="obj">The object on which to excute function 'func'</param>
+		/// <param name="objct">The object on which to excute function 'func'</param>
 		/// <param name="func">The function to execute</param>
 		/// <param name="parameters">The parameters to pass to function 'func'</param>
 		/// <returns>The result of the function invocation</returns>
-		public object Call2(object obj, string func, object[] parameters)
+		public static object Call2(object objct, string func, object[] parameters)
 		{
-			return CallAs2(obj.GetType(), obj, func, parameters);
+			return CallAs2(objct.GetType(), objct, func, parameters);
 		}
 
 		/// <summary>
 		/// Calls method 'func' on object 'obj' which is of type 'type' passing parameters 'parameters'
 		/// </summary>
 		/// <param name="type">The type of 'obj'</param>
-		/// <param name="obj">The object on which to excute function 'func'</param>
+		/// <param name="objct">The object on which to excute function 'func'</param>
 		/// <param name="func">The function to execute</param>
 		/// <param name="parameters">The parameters to pass to function 'func'</param>
 		/// <returns>The result of the function invocation</returns>
-		public object CallAs(Type type, object obj, string func, params object[] parameters)
+		public static object CallAs(Type type, object objct, string func, params object[] parameters)
 		{
-			return CallAs2(type, obj, func, parameters);
+			return CallAs2(type, objct, func, parameters);
 		}
 
 		/// <summary>
 		/// Calls method 'func' on object 'obj' which is of type 'type' passing parameters 'parameters'
 		/// </summary>
 		/// <param name="type">The type of 'obj'</param>
-		/// <param name="obj">The object on which to excute function 'func'</param>
+		/// <param name="objct">The object on which to excute function 'func'</param>
 		/// <param name="func">The function to execute</param>
 		/// <param name="parameters">The parameters to pass to function 'func'</param>
 		/// <returns>The result of the function invocation</returns>
-		public object CallAs2(Type type, object obj, string func, object[] parameters) {
+		public static object CallAs2(Type type, object objct, string func, object[] parameters) {
 			MethodInfo methInfo = type.GetMethod(func, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			return methInfo.Invoke(obj, parameters);
+			return methInfo.Invoke(objct, parameters);
 		}
 
 		/// <summary>
 		/// Returns the value of property 'prop' of object 'obj'
 		/// </summary>
-		/// <param name="obj">The object containing 'prop'</param>
+		/// <param name="objct">The object containing 'prop'</param>
 		/// <param name="prop">The property name</param>
 		/// <returns>The property value</returns>
-		public object Get(object obj, string prop)
+		public static object Get(object objct, string prop)
 		{
-			return GetAs(obj.GetType(), obj, prop);
+			return GetAs(objct.GetType(), objct, prop);
 		}
 
 		/// <summary>
 		/// Returns the value of property 'prop' of object 'obj' which has type 'type'
 		/// </summary>
 		/// <param name="type">The type of 'obj'</param>
-		/// <param name="obj">The object containing 'prop'</param>
+		/// <param name="objct">The object containing 'prop'</param>
 		/// <param name="prop">The property name</param>
 		/// <returns>The property value</returns>
-		public object GetAs(Type type, object obj, string prop) {
+		public static object GetAs(Type type, object objct, string prop) {
 			PropertyInfo propInfo = type.GetProperty(prop, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			return propInfo.GetValue(obj, null);
+			return propInfo.GetValue(objct, null);
 		}
 
 		/// <summary>

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace SearchForFilesAndGuptaPlaces
 {
@@ -18,7 +19,7 @@ namespace SearchForFilesAndGuptaPlaces
 
     public partial class Form1 : Form
     {
-        private List<GridView> gridObjects;
+        private readonly List<GridView> gridObjects;
 
         public Form1()
         {
@@ -45,16 +46,16 @@ namespace SearchForFilesAndGuptaPlaces
         private const String sqlFormat = "sql";
         private const String fileNameRegex = "[^\\\\]*$";
         private const String defaultFormats = "sql,apt";
-        private String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
-        private String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
-        private String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
+        private readonly String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
+        private readonly String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
+        private readonly String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
 
         /// <summary>
         /// Choose and save chosen directory
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void directoryBtn_Click(object sender, EventArgs e)
+        private void DirectoryBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             FolderSelectDialog folderSelectorDialog = new FolderSelectDialog() { Title = "Select a folder", InitialDirectory = @"c:\" };
@@ -69,7 +70,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void searchBtn_Click(object sender, EventArgs e)
+        private void SearchBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             if (!String.IsNullOrWhiteSpace(directoryPathLbl.Text))
@@ -82,7 +83,6 @@ namespace SearchForFilesAndGuptaPlaces
                     searchKeywords = new String[] { searchTxt.Text };
 
                 List<FileView> files = new List<FileView>();
-                Boolean isApt;
 
                 CurrentId = 1;
                 gridObjects.Clear();
@@ -147,7 +147,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void openFileBtn_Click(object sender, EventArgs e)
+        private void OpenFileBtn_Click(object sender, EventArgs e)
         {
             if (dataGrid.SelectedRows.Count > 0)
             {
@@ -161,7 +161,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void dataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void DataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
@@ -172,7 +172,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void dataGrid_SelectionChanged(object sender, EventArgs e)
+        private void DataGrid_SelectionChanged(object sender, EventArgs e)
         {
             ReloadPreviewTextBox();
         }
@@ -181,7 +181,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void searchUpDown_ValueChanged(object sender, EventArgs e)
+        private void SearchUpDown_ValueChanged(object sender, EventArgs e)
         {
             ReloadPreviewTextBox();
         }
@@ -202,7 +202,7 @@ namespace SearchForFilesAndGuptaPlaces
                 Int32 lineCounter = 0;
 
                 //loop through lines looking for our text and filling in the table with found results
-                foreach (String line in lines.Select(s => s.ToLower()))
+                foreach (String line in lines.Select(s => s.ToUpperInvariant()))
                 {
                     foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
                     {
@@ -232,14 +232,14 @@ namespace SearchForFilesAndGuptaPlaces
                                     {
                                         if (!classNameFound && (guptaFunctions.Any(lines[backwardsCounter].Contains)))
                                         {
-                                            view.ClassName = parseObjectName(lines[backwardsCounter], guptaFunctions);
+                                            view.ClassName = ParseObjectName(lines[backwardsCounter], guptaFunctions);
                                             classNameFound = true;
                                         }
 
                                         if (guptaClasses.Any(lines[backwardsCounter].Contains))
                                         {
                                             goBack = false;
-                                            view.ObjectName = parseObjectName(lines[backwardsCounter], guptaClasses);
+                                            view.ObjectName = ParseObjectName(lines[backwardsCounter], guptaClasses);
                                         }
 
                                         backwardsCounter--;
@@ -247,10 +247,10 @@ namespace SearchForFilesAndGuptaPlaces
                                 else
                                     while (goBack && backwardsCounter >= 0)
                                     {
-                                        if (sqlHeaders.Any(lines[backwardsCounter].ToUpper().Contains))
+                                        if (sqlHeaders.Any(lines[backwardsCounter].ToUpperInvariant().Contains))
                                         {
                                             goBack = false;
-                                            view.ClassName = parseObjectName(lines[backwardsCounter], sqlHeaders, true);
+                                            view.ClassName = ParseObjectName(lines[backwardsCounter], sqlHeaders, true);
                                         }
 
                                         backwardsCounter--;
@@ -286,7 +286,7 @@ namespace SearchForFilesAndGuptaPlaces
             {
                 var nppExePath = Path.Combine(nppDir, notepadPPName);
                 var sb = new StringBuilder();
-                sb.AppendFormat("\"{0}\" -n{1}", filePath, lineToGoTo);
+                sb.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\" -n{1}", filePath, lineToGoTo);
                 Process.Start(nppExePath, sb.ToString());
             }
             else
@@ -310,7 +310,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="filePath">Path to the file</param>
         /// <returns>File name</returns>
-        private String GetFileNameFromPath(String filePath)
+        private static String GetFileNameFromPath(String filePath)
         {
             String fileName = String.Empty;
 
@@ -329,15 +329,15 @@ namespace SearchForFilesAndGuptaPlaces
         /// <param name="keywords">Keywords matching function/method/procedure... names</param>
         /// <param name="caseInsensitive">If true, turns the line to uppercase when comparing</param>
         /// <returns></returns>
-        private String parseObjectName(String line, String[] keywords, Boolean caseInsensitive = false)
+        private static String ParseObjectName(String line, String[] keywords, Boolean caseInsensitive = false)
         {
-            String tempLine = caseInsensitive ? line.ToUpper() : line;
+            String tempLine = caseInsensitive ? line.ToUpperInvariant() : line;
 
             foreach(var k in keywords)
             {
                 if (tempLine.Contains(k))
                 {
-                    String result = line.Substring(tempLine.IndexOf(k) + k.Length);
+                    String result = line.Substring(tempLine.IndexOf(k, StringComparison.InvariantCulture) + k.Length);
                     Int32 index = result.IndexOf('(');
                     if (index != -1)
                         return result.Substring(0, index);
