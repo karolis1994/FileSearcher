@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using SearchForFilesAndGuptaPlaces.Services;
+using System;
 using System.Windows.Forms;
 
 namespace SearchForFilesAndGuptaPlaces
@@ -14,9 +12,11 @@ namespace SearchForFilesAndGuptaPlaces
         [STAThread]
         static void Main()
         {
+            IFileSearchService fileSearchService = new FileSearchService();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1(fileSearchService));
         }
     }
 }

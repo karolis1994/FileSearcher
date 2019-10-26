@@ -12,20 +12,25 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Globalization;
+using SearchForFilesAndGuptaPlaces.Models;
+using Easy.Common;
+using SearchForFilesAndGuptaPlaces.Services;
+using System.Threading;
 
 namespace SearchForFilesAndGuptaPlaces
 {
-    public enum FileType { apt, sql, other }
-
     public partial class Form1 : Form
     {
-        private readonly List<GridView> gridObjects;
+        private object _lock = new object();
+        private readonly List<SearchResult> gridObjects;
+        private readonly IFileSearchService fileSearchService;
 
-        public Form1()
+        public Form1(IFileSearchService fileSearchService)
         {
             InitializeComponent();
 
-            gridObjects = new List<GridView>();
+            this.fileSearchService = fileSearchService;
+            gridObjects = new List<SearchResult>();
 
             if (File.Exists("Resources/if_search_b_44994.ico"))
                 Icon = new Icon("Resources/if_search_b_44994.ico");
@@ -38,17 +43,10 @@ namespace SearchForFilesAndGuptaPlaces
             this.ActiveControl = searchTxt;
         }
 
-        private Int32 CurrentId;
         private const String notepadName = "notepad.exe";
         private const String notepadPPName = "Notepad++.exe";
         private const String notepadPPRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++";
-        private const String aptFormat = "apt";
-        private const String sqlFormat = "sql";
-        private const String fileNameRegex = "[^\\\\]*$";
         private const String defaultFormats = "sql,apt";
-        private readonly String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
-        private readonly String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
-        private readonly String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
 
         /// <summary>
         /// Choose and save chosen directory
@@ -70,46 +68,27 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SearchBtn_Click(object sender, EventArgs e)
+        private async void SearchBtn_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            if (!String.IsNullOrWhiteSpace(directoryPathLbl.Text))
-            {
-                String[] fileFormats = formatsTxt.Text.Split(',');
-                String[] searchKeywords;
-                if (separatorTextBox.Text.Length == 1)
-                    searchKeywords = searchTxt.Text.Split(separatorTextBox.Text[0]);
-                else
-                    searchKeywords = new String[] { searchTxt.Text };
+            searchBtn.Enabled = false;
+            gridObjects.Clear();
 
-                List<FileView> files = new List<FileView>();
+            //Get files
+            var files = await fileSearchService.GetFiles(formatsTxt.Text.Split(','), directoryPathLbl.Text).ConfigureAwait(false);
+            //Go through files in parallel searching them
+            var searchResultArrays = await Task.WhenAll(files.Select(f => fileSearchService.FindInFileAsync(f, searchTxt.Text.Split(separatorTextBox.Text[0]))).ToArray())
+                .ConfigureAwait(false);
+            var searchResults = searchResultArrays.SelectMany(f => f);
 
-                CurrentId = 1;
-                gridObjects.Clear();
+            gridObjects.AddRange(searchResults);
 
-                //Loop through all file formats
-                foreach (String format in fileFormats)
-                {
-                    //determine format
-                    FileType fileType = FileType.other;
-                    if (format == aptFormat)
-                        fileType = FileType.apt;
-                    else if (format == sqlFormat)
-                        fileType = FileType.sql;
-
-                    //get all files of this format
-                    foreach (String filePath in Directory.GetFiles(directoryPathLbl.Text, $"*.{format}", SearchOption.AllDirectories))
-                        files.Add(new FileView() { FilePath = filePath, FileType = fileType });
-                }
-
-                Parallel.ForEach(files, i => FindTextInFile(i, searchKeywords));
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
+            //For some reason threads switch here and i get exception for cross-threading....
+            this.Invoke((Action)(() => { 
                 LoadGrid();
-            }
-            Cursor.Current = Cursors.Arrow;
+                searchBtn.Enabled = true;
+                Cursor.Current = Cursors.Arrow;
+            }));
         }
         /// <summary>
         /// Resize result boxes
@@ -133,13 +112,13 @@ namespace SearchForFilesAndGuptaPlaces
         {
             dataGrid.Rows.Clear();
 
-            foreach (GridView obj in gridObjects
-                .OrderBy(obj => obj.SearchedText)
+            foreach (SearchResult obj in gridObjects
+                .OrderBy(obj => obj.SearchKeyword)
                 .ThenByDescending(obj => obj.IsGuptaFile)
                 .ThenBy(obj => obj.FilePath)
                 .ThenBy(obj => obj.RowNumber))
             {
-                dataGrid.Rows.Add(obj.SearchedText, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
+                dataGrid.Rows.Add(obj.SearchKeyword, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
             }
         }
         /// <summary>
@@ -151,7 +130,7 @@ namespace SearchForFilesAndGuptaPlaces
         {
             if (dataGrid.SelectedRows.Count > 0)
             {
-                GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
+                SearchResult selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
                 OpenTextFile(selected.FilePath, selected.RowNumber);
             }
@@ -163,7 +142,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// <param name="e"></param>
         private void DataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            GridView selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
+            SearchResult selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
             OpenTextFile(selected.FilePath, selected.RowNumber);
         }
@@ -172,105 +151,18 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DataGrid_SelectionChanged(object sender, EventArgs e)
+        private async void DataGrid_SelectionChanged(object sender, EventArgs e)
         {
-            ReloadPreviewTextBox();
+            await ReloadPreviewTextBox().ConfigureAwait(false);
         }
         /// <summary>
         /// Reload preview for the selected row, since we changed how many rows we want to see
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SearchUpDown_ValueChanged(object sender, EventArgs e)
+        private async void SearchUpDown_ValueChanged(object sender, EventArgs e)
         {
-            ReloadPreviewTextBox();
-        }
-
-        /// <summary>
-        /// Search the file for keywords and load all of the results into gridObjects list
-        /// </summary>
-        /// <param name="file"></param>
-        /// <param name="searchKeywords"></param>
-        private void FindTextInFile(FileView file, String[] searchKeywords)
-        {
-            List<GridView> localResults = new List<GridView>();
-
-            if (searchKeywords.Any(key => !String.IsNullOrWhiteSpace(key)))
-            {
-                var lines = File.ReadAllLines(file.FilePath);
-                String fileName = GetFileNameFromPath(file.FilePath);
-                Int32 lineCounter = 0;
-
-                //loop through lines looking for our text and filling in the table with found results
-                foreach (String line in lines.Select(s => s.ToUpperInvariant()))
-                {
-                    foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
-                    {
-                        if (line.Contains(keyword))
-                        {
-                            GridView view = new GridView()
-                            {
-                                SearchedText = keyword,
-                                FileName = fileName,
-                                RowNumber = lineCounter + 1,
-                                FilePath = file.FilePath,
-                                Id = CurrentId,
-                                IsGuptaFile = file.FileType == FileType.apt
-                            };
-
-                            CurrentId++;
-
-                            //if format of file is "apt" get class function/window name
-                            if (file.FileType == FileType.apt || file.FileType == FileType.sql)
-                            {
-                                Boolean goBack = true;
-                                Boolean classNameFound = false;
-                                Int64 backwardsCounter = lineCounter;
-
-                                if (file.FileType == FileType.apt)
-                                    while (goBack && backwardsCounter > 0)
-                                    {
-                                        if (!classNameFound && (guptaFunctions.Any(lines[backwardsCounter].Contains)))
-                                        {
-                                            view.ClassName = ParseObjectName(lines[backwardsCounter], guptaFunctions);
-                                            classNameFound = true;
-                                        }
-
-                                        if (guptaClasses.Any(lines[backwardsCounter].Contains))
-                                        {
-                                            goBack = false;
-                                            view.ObjectName = ParseObjectName(lines[backwardsCounter], guptaClasses);
-                                        }
-
-                                        backwardsCounter--;
-                                    }
-                                else
-                                    while (goBack && backwardsCounter >= 0)
-                                    {
-                                        if (sqlHeaders.Any(lines[backwardsCounter].ToUpperInvariant().Contains))
-                                        {
-                                            goBack = false;
-                                            view.ClassName = ParseObjectName(lines[backwardsCounter], sqlHeaders, true);
-                                        }
-
-                                        backwardsCounter--;
-                                    }
-                            }
-
-                            localResults.Add(view);
-                        }
-                    }
-
-                    lineCounter++;
-                }
-
-                //Add results to the final list
-                if (localResults.Count > 0)
-                    lock (gridObjects)
-                    {
-                        gridObjects.AddRange(localResults);
-                    }
-            }
+            await ReloadPreviewTextBox().ConfigureAwait(false);
         }
         /// <summary>
         /// Opens a file in notepad++ if its installed, or notepad if not
@@ -297,99 +189,25 @@ namespace SearchForFilesAndGuptaPlaces
         /// <summary>
         /// Reloads preview text box if rules required for it to load are correct
         /// </summary>
-        private void ReloadPreviewTextBox()
+        private async Task ReloadPreviewTextBox()
         {
+            var result = String.Empty;
+
             //If a row has been selected and we want to see a result line
             if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)
-                previewTextBox.Text = GetResultPreview(gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID()));
-            else if (searchUpDown.Value == 0)
-                previewTextBox.Text = String.Empty;
-        }
-        /// <summary>
-        /// Parse file path and return 
-        /// </summary>
-        /// <param name="filePath">Path to the file</param>
-        /// <returns>File name</returns>
-        private static String GetFileNameFromPath(String filePath)
-        {
-            String fileName = String.Empty;
+                result = await fileSearchService
+                    .GetResultPreview(gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID()), (int)searchUpDown.Value)
+                    .ConfigureAwait(false);
 
-            Match match = Regex.Match(filePath, fileNameRegex);
-            if (match.Success)
-            {
-                fileName = match.Value;
-            }
-
-            return fileName;
-        }
-        /// <summary>
-        /// Parses line of text and shortens it taking away the keywords
-        /// </summary>
-        /// <param name="line">Line of text</param>
-        /// <param name="keywords">Keywords matching function/method/procedure... names</param>
-        /// <param name="caseInsensitive">If true, turns the line to uppercase when comparing</param>
-        /// <returns></returns>
-        private static String ParseObjectName(String line, String[] keywords, Boolean caseInsensitive = false)
-        {
-            String tempLine = caseInsensitive ? line.ToUpperInvariant() : line;
-
-            foreach(var k in keywords)
-            {
-                if (tempLine.Contains(k))
-                {
-                    String result = line.Substring(tempLine.IndexOf(k, StringComparison.InvariantCulture) + k.Length);
-                    Int32 index = result.IndexOf('(');
-                    if (index != -1)
-                        return result.Substring(0, index);
-
-                    return result;
-                }
-            }
-
-            return line;
-        }
-        /// <summary>
-        /// Loads text lines from result object for preview
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        private String GetResultPreview(GridView item)
-        {
-            String result = String.Empty;
-            Int32 linesToDisplay = (Int32)searchUpDown.Value;
-
-            if (item != null)
-            {
-                //When we want to see a single line, we skip all lines until result line
-                Int32 startingLine = item.RowNumber - 1;
-
-                //if we want to see more find out how much is half of our lines and set resultRowNumber - halfOfLines to be skipped.
-                //This is done to keep the search result around the middle of preview window
-                if (linesToDisplay > 1)
-                {
-                    Decimal temp = searchUpDown.Value / 2;
-                    Int32 halfCounter = (Int32)Math.Round(temp, 0, MidpointRounding.AwayFromZero);
-
-                    startingLine = item.RowNumber - halfCounter;
-
-                    //If our result row number - half of preview lines is a negative number, simply set it back to 0
-                    if (startingLine < 0)
-                        startingLine = 0;
-                }
-
-                //Join the selected lines into a single string
-                result = String.Join(Environment.NewLine, File.ReadLines(item.FilePath).Skip(startingLine).Take(linesToDisplay));
-            }
-
-            return result;
+            this.Invoke((Action)(() => previewTextBox.Text = result));
         }
         /// <summary>
         /// Returns the ID of first selected row object
         /// </summary>
         /// <returns>Id of selected row object</returns>
-        private Int32 GetSelectedRowID()
+        private string GetSelectedRowID()
         {
-            return (Int32)dataGrid.SelectedRows[0].Cells["Id"].Value;
+            return (string)dataGrid.SelectedRows[0].Cells["Id"].Value;
         }
 
 
