@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SearchForFilesAndGuptaPlaces.Models
+﻿namespace SearchForFilesAndGuptaPlaces.Models
 {
     /// <summary>
     /// File type enumerator
@@ -14,11 +8,11 @@ namespace SearchForFilesAndGuptaPlaces.Models
         /// <summary>
         /// Apt, gupta file
         /// </summary>
-        Apt, 
+        Apt,
         /// <summary>
         /// Sql file
         /// </summary>
-        Sql, 
+        Sql,
         /// <summary>
         /// Other file
         /// </summary>

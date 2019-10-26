@@ -1,27 +1,23 @@
 ﻿using Microsoft.Win32;
+using SearchForFilesAndGuptaPlaces.Models;
+using SearchForFilesAndGuptaPlaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Reflection;
-using System.Windows.Forms;
+using System.Text;
 using System.Threading.Tasks;
-using System.Globalization;
-using SearchForFilesAndGuptaPlaces.Models;
-using Easy.Common;
-using SearchForFilesAndGuptaPlaces.Services;
-using System.Threading;
+using System.Windows.Forms;
 
 namespace SearchForFilesAndGuptaPlaces
 {
     public partial class Form1 : Form
     {
-        private object _lock = new object();
         private readonly List<SearchResult> gridObjects;
         private readonly IFileSearchService fileSearchService;
 
@@ -84,7 +80,8 @@ namespace SearchForFilesAndGuptaPlaces
             gridObjects.AddRange(searchResults);
 
             //For some reason threads switch here and i get exception for cross-threading....
-            this.Invoke((Action)(() => { 
+            this.Invoke((Action)(() =>
+            {
                 LoadGrid();
                 searchBtn.Enabled = true;
                 Cursor.Current = Cursors.Arrow;
@@ -103,7 +100,7 @@ namespace SearchForFilesAndGuptaPlaces
             previewTextBox.Size = new Size(this.Size.Width - dataGrid.Location.X - dataGrid.Size.Width - 30, dataGrid.Size.Height);
             previewTextBox.Location = new Point(dataGrid.Location.X + dataGrid.Size.Width + 6, previewTextBox.Location.Y);
             previewLbl.Location = new Point(previewTextBox.Location.X, previewLbl.Location.Y);
-            
+
         }
         /// <summary>
         /// Load grid from gridview list

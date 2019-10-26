@@ -31,7 +31,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
                         Int32 lineCounter = 0;
 
                         //loop through lines looking for our text and filling in the table with found results
-                        foreach(var line in lines.Select(s => s.ToUpperInvariant()))
+                        foreach (var line in lines.Select(s => s.ToUpperInvariant()))
                         {
                             foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
                             {
@@ -110,7 +110,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
         {
             String tempLine = caseInsensitive ? line.ToUpperInvariant() : line;
 
-            foreach(var k in keywords)
+            foreach (var k in keywords)
             {
                 if (tempLine.Contains(k))
                 {
@@ -202,11 +202,11 @@ namespace SearchForFilesAndGuptaPlaces.Services
 
                     //get all files of this format
                     foreach (String filePath in Directory.GetFiles(startingDirectory, $"*.{format}", SearchOption.AllDirectories))
-                        files.Add(new Models.FileInfo() 
-                        { 
-                            FilePath = filePath, 
-                            FileType = fileType, 
-                            FileName = await GetFileNameFromPath(filePath).ConfigureAwait(false) 
+                        files.Add(new Models.FileInfo()
+                        {
+                            FilePath = filePath,
+                            FileType = fileType,
+                            FileName = await GetFileNameFromPath(filePath).ConfigureAwait(false)
                         });
                 }
 

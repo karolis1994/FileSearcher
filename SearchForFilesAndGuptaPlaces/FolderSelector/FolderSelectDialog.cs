@@ -8,29 +8,29 @@ using System.Windows.Forms;
 
 namespace SearchForFilesAndGuptaPlaces
 {
-    /// <summary>
-    /// Wraps System.Windows.Forms.OpenFileDialog to make it present
-    /// a vista-style dialog.
-    /// </summary>
-    public class FolderSelectDialog
+	/// <summary>
+	/// Wraps System.Windows.Forms.OpenFileDialog to make it present
+	/// a vista-style dialog.
+	/// </summary>
+	public class FolderSelectDialog
 	{
-        // Wrapped dialog
-        readonly System.Windows.Forms.OpenFileDialog ofd = null;
+		// Wrapped dialog
+		readonly System.Windows.Forms.OpenFileDialog ofd = null;
 
 		/// <summary>
 		/// Default constructor
 		/// </summary>
 		public FolderSelectDialog()
 		{
-            ofd = new System.Windows.Forms.OpenFileDialog
-            {
-                Filter = "Folders|\n",
-                AddExtension = false,
-                CheckFileExists = false,
-                DereferenceLinks = true,
-                Multiselect = false
-            };
-        }
+			ofd = new System.Windows.Forms.OpenFileDialog
+			{
+				Filter = "Folders|\n",
+				AddExtension = false,
+				CheckFileExists = false,
+				DereferenceLinks = true,
+				Multiselect = false
+			};
+		}
 
 		#region Properties
 
@@ -60,15 +60,15 @@ namespace SearchForFilesAndGuptaPlaces
 			get { return ofd.FileName; }
 		}
 
-        #endregion
+		#endregion
 
-        #region Methods
+		#region Methods
 
-        /// <summary>
-        /// Shows the dialog
-        /// </summary>
-        /// <returns>True if the user presses OK else false</returns>
-        public bool ShowDialog()
+		/// <summary>
+		/// Shows the dialog
+		/// </summary>
+		/// <returns>True if the user presses OK else false</returns>
+		public bool ShowDialog()
 		{
 			return ShowDialog(IntPtr.Zero);
 		}
@@ -89,15 +89,15 @@ namespace SearchForFilesAndGuptaPlaces
 				uint num = 0;
 				Type typeIFileDialog = r.GetType("FileDialogNative.IFileDialog");
 				object dialog = Reflector.Call(ofd, "CreateVistaDialog");
-                Reflector.Call(ofd, "OnBeforeVistaDialog", dialog);
+				Reflector.Call(ofd, "OnBeforeVistaDialog", dialog);
 
 				uint options = (uint)Reflector.CallAs(typeof(System.Windows.Forms.FileDialog), ofd, "GetOptions");
 				options |= (uint)r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
-                Reflector.CallAs(typeIFileDialog, dialog, "SetOptions", options);
+				Reflector.CallAs(typeIFileDialog, dialog, "SetOptions", options);
 
 				object pfde = r.New("FileDialog.VistaDialogEvents", ofd);
 				object[] parameters = new object[] { pfde, num };
-                Reflector.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
+				Reflector.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
 				num = (uint)parameters[1];
 				try
 				{
@@ -112,15 +112,15 @@ namespace SearchForFilesAndGuptaPlaces
 			}
 			else
 			{
-                var fbd = new FolderBrowserDialog
-                {
-                    Description = this.Title,
-                    SelectedPath = this.InitialDirectory,
-                    ShowNewFolderButton = false
-                };
-                if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
+				var fbd = new FolderBrowserDialog
+				{
+					Description = this.Title,
+					SelectedPath = this.InitialDirectory,
+					ShowNewFolderButton = false
+				};
+				if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
 				ofd.FileName = fbd.SelectedPath;
-                flag = true;
+				flag = true;
 			}
 
 			return flag;

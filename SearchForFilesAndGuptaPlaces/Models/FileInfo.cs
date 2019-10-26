@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SearchForFilesAndGuptaPlaces.Models
+﻿namespace SearchForFilesAndGuptaPlaces.Models
 {
     /// <summary>
     /// File information model containing all the data relevant to the search
