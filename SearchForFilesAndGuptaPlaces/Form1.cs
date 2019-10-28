@@ -39,10 +39,10 @@ namespace SearchForFilesAndGuptaPlaces
             this.ActiveControl = searchTxt;
         }
 
-        private const String notepadName = "notepad.exe";
-        private const String notepadPPName = "Notepad++.exe";
-        private const String notepadPPRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++";
-        private const String defaultFormats = "sql,apt";
+        private const string notepadName = "notepad.exe";
+        private const string notepadPPName = "Notepad++.exe";
+        private const string notepadPPRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Notepad++";
+        private const string defaultFormats = "sql,apt";
 
         /// <summary>
         /// Choose and save chosen directory
@@ -94,9 +94,9 @@ namespace SearchForFilesAndGuptaPlaces
         /// <param name="e"></param>
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            //formatsTxt.Size = new Size((Int32)(this.Size.Width * 0.67), formatsTxt.Size.Height);
-            //searchTxt.Size = new Size((Int32)(this.Size.Width * 0.8), searchTxt.Size.Height);
-            dataGrid.Size = new Size((Int32)(this.Size.Width * 0.638), this.Size.Height - dataGrid.Location.Y - 50);
+            //formatsTxt.Size = new Size((int)(this.Size.Width * 0.67), formatsTxt.Size.Height);
+            //searchTxt.Size = new Size((int)(this.Size.Width * 0.8), searchTxt.Size.Height);
+            dataGrid.Size = new Size((int)(this.Size.Width * 0.638), this.Size.Height - dataGrid.Location.Y - 50);
             previewTextBox.Size = new Size(this.Size.Width - dataGrid.Location.X - dataGrid.Size.Width - 30, dataGrid.Size.Height);
             previewTextBox.Location = new Point(dataGrid.Location.X + dataGrid.Size.Width + 6, previewTextBox.Location.Y);
             previewLbl.Location = new Point(previewTextBox.Location.X, previewLbl.Location.Y);
@@ -109,7 +109,7 @@ namespace SearchForFilesAndGuptaPlaces
         {
             dataGrid.Rows.Clear();
 
-            foreach (SearchResult obj in gridObjects
+            foreach (var obj in gridObjects
                 .OrderBy(obj => obj.SearchKeyword)
                 .ThenByDescending(obj => obj.IsGuptaFile)
                 .ThenBy(obj => obj.FilePath)
@@ -127,7 +127,7 @@ namespace SearchForFilesAndGuptaPlaces
         {
             if (dataGrid.SelectedRows.Count > 0)
             {
-                SearchResult selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
+                var selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
                 OpenTextFile(selected.FilePath, selected.RowNumber);
             }
@@ -139,7 +139,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// <param name="e"></param>
         private void DataGrid_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            SearchResult selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
+            var selected = gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID());
 
             OpenTextFile(selected.FilePath, selected.RowNumber);
         }
@@ -166,12 +166,12 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="lineToGoTo"></param>
-        private void OpenTextFile(String filePath, Int32 lineToGoTo)
+        private void OpenTextFile(string filePath, int lineToGoTo)
         {
-            var nppDir = (String)Registry.GetValue(notepadPPRegistryPath, null, null);
+            var nppDir = (string)Registry.GetValue(notepadPPRegistryPath, null, null);
 
             //if Notepad++ is installed
-            if (!String.IsNullOrWhiteSpace(nppDir))
+            if (!string.IsNullOrWhiteSpace(nppDir))
             {
                 var nppExePath = Path.Combine(nppDir, notepadPPName);
                 var sb = new StringBuilder();
@@ -188,7 +188,7 @@ namespace SearchForFilesAndGuptaPlaces
         /// </summary>
         private async Task ReloadPreviewTextBox()
         {
-            var result = String.Empty;
+            var result = string.Empty;
 
             //If a row has been selected and we want to see a result line
             if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)

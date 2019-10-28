@@ -14,30 +14,30 @@ namespace SearchForFilesAndGuptaPlaces.Services
         private const string _AptFormat = "apt";
         private const string _SqlFormat = "sql";
         private const string _FileNameRegex = "[^\\\\]*$";
-        private readonly String[] guptaFunctions = new String[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
-        private readonly String[] guptaClasses = new String[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
-        private readonly String[] sqlHeaders = new String[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
+        private readonly string[] guptaFunctions = new string[2] { ".head 5 +  Function:", ".head 3 +  Function:" };
+        private readonly string[] guptaClasses = new string[2] { ".head 3 +  Functional Class:", ".head 1 +  " };
+        private readonly string[] sqlHeaders = new string[4] { "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER" };
         private object _lock = new object();
 
         public async Task<IEnumerable<SearchResult>> FindInFileAsync(Models.FileInfo file, string[] searchKeywords)
         {
             return await Task.Run(() =>
                 {
-                    List<SearchResult> localResults = new List<SearchResult>();
+                    var localResults = new List<SearchResult>();
 
-                    if (searchKeywords.Any(key => !String.IsNullOrWhiteSpace(key)))
+                    if (searchKeywords.Any(key => !string.IsNullOrWhiteSpace(key)))
                     {
                         var lines = File.ReadAllLines(file.FilePath);
-                        Int32 lineCounter = 0;
+                        var lineCounter = 0;
 
                         //loop through lines looking for our text and filling in the table with found results
                         foreach (var line in lines.Select(s => s.ToUpperInvariant()))
                         {
-                            foreach (String keyword in searchKeywords.Where(key => !String.IsNullOrWhiteSpace(key)))
+                            foreach (string keyword in searchKeywords.Where(key => !string.IsNullOrWhiteSpace(key)))
                             {
                                 if (line.Contains(keyword))
                                 {
-                                    SearchResult view = new SearchResult()
+                                    var view = new SearchResult()
                                     {
                                         SearchKeyword = keyword,
                                         FileName = file.FileName,
@@ -50,9 +50,9 @@ namespace SearchForFilesAndGuptaPlaces.Services
                                     //if format of file is "Apt" get class function/window name
                                     if (file.FileType == FileType.Apt || file.FileType == FileType.Sql)
                                     {
-                                        Boolean goBack = true;
-                                        Boolean classNameFound = false;
-                                        Int64 backwardsCounter = lineCounter;
+                                        var goBack = true;
+                                        var classNameFound = false;
+                                        var backwardsCounter = lineCounter;
 
                                         if (file.FileType == FileType.Apt)
                                             while (goBack && backwardsCounter > 0)
@@ -106,16 +106,16 @@ namespace SearchForFilesAndGuptaPlaces.Services
         /// <param name="keywords">Keywords matching function/method/procedure... names</param>
         /// <param name="caseInsensitive">If true, turns the line to uppercase when comparing</param>
         /// <returns></returns>
-        private static String ParseObjectName(String line, String[] keywords, Boolean caseInsensitive = false)
+        private static string ParseObjectName(string line, string[] keywords, bool caseInsensitive = false)
         {
-            String tempLine = caseInsensitive ? line.ToUpperInvariant() : line;
+            var tempLine = caseInsensitive ? line.ToUpperInvariant() : line;
 
             foreach (var k in keywords)
             {
                 if (tempLine.Contains(k))
                 {
-                    String result = line.Substring(tempLine.IndexOf(k, StringComparison.InvariantCulture) + k.Length);
-                    Int32 index = result.IndexOf('(');
+                    var result = line.Substring(tempLine.IndexOf(k, StringComparison.InvariantCulture) + k.Length);
+                    var index = result.IndexOf('(');
                     if (index != -1)
                         return result.Substring(0, index);
 
@@ -131,11 +131,11 @@ namespace SearchForFilesAndGuptaPlaces.Services
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        private async Task<string> GetFileNameFromPath(String filePath)
+        private async Task<string> GetFileNameFromPath(string filePath)
         {
             return await Task.Run(() =>
                 {
-                    String fileName = String.Empty;
+                    var fileName = string.Empty;
 
                     Match match = Regex.Match(filePath, _FileNameRegex);
                     if (match.Success)
@@ -148,23 +148,23 @@ namespace SearchForFilesAndGuptaPlaces.Services
                 .ConfigureAwait(false);
         }
 
-        public async Task<String> GetResultPreview(SearchResult item, int linesToDisplay)
+        public async Task<string> GetResultPreview(SearchResult item, int linesToDisplay)
         {
             return await Task.Run(() =>
                 {
-                    String result = String.Empty;
+                    var result = string.Empty;
 
                     if (item != null)
                     {
                         //When we want to see a single line, we skip all lines until result line
-                        Int32 startingLine = item.RowNumber - 1;
+                        int startingLine = item.RowNumber - 1;
 
                         //if we want to see more find out how much is half of our lines and set resultRowNumber - halfOfLines to be skipped.
                         //This is done to keep the search result around the middle of preview window
                         if (linesToDisplay > 1)
                         {
                             Decimal temp = linesToDisplay / 2;
-                            Int32 halfCounter = (Int32)Math.Round(temp, 0, MidpointRounding.AwayFromZero);
+                            var halfCounter = (int)Math.Round(temp, 0, MidpointRounding.AwayFromZero);
 
                             startingLine = item.RowNumber - halfCounter;
 
@@ -174,7 +174,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
                         }
 
                         //Join the selected lines into a single string
-                        result = String.Join(Environment.NewLine, File.ReadLines(item.FilePath).Skip(startingLine).Take(linesToDisplay));
+                        result = string.Join(Environment.NewLine, File.ReadLines(item.FilePath).Skip(startingLine).Take(linesToDisplay));
                     }
 
                     return result;
@@ -184,12 +184,12 @@ namespace SearchForFilesAndGuptaPlaces.Services
 
         public async Task<IEnumerable<Models.FileInfo>> GetFiles(string[] fileFormats, string startingDirectory)
         {
-            if (!String.IsNullOrWhiteSpace(startingDirectory))
+            if (!string.IsNullOrWhiteSpace(startingDirectory))
             {
-                List<Models.FileInfo> files = new List<Models.FileInfo>();
+                var files = new List<Models.FileInfo>();
 
                 //Loop through all file formats
-                foreach (String format in fileFormats)
+                foreach (string format in fileFormats)
                 {
                     //determine format
                     FileType fileType;
@@ -201,7 +201,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
                         fileType = FileType.Other;
 
                     //get all files of this format
-                    foreach (String filePath in Directory.GetFiles(startingDirectory, $"*.{format}", SearchOption.AllDirectories))
+                    foreach (string filePath in Directory.GetFiles(startingDirectory, $"*.{format}", SearchOption.AllDirectories))
                         files.Add(new Models.FileInfo()
                         {
                             FilePath = filePath,
