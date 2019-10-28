@@ -79,10 +79,12 @@ namespace SearchForFilesAndGuptaPlaces
 
             gridObjects.AddRange(searchResults);
 
-            //For some reason threads switch here and i get exception for cross-threading....
+            //Load grid asynchronously
+            await LoadGrid().ConfigureAwait(false);
+
+            //Enable the fields back
             this.Invoke((Action)(() =>
             {
-                LoadGrid();
                 searchBtn.Enabled = true;
                 Cursor.Current = Cursors.Arrow;
             }));
@@ -103,20 +105,55 @@ namespace SearchForFilesAndGuptaPlaces
 
         }
         /// <summary>
-        /// Load grid from gridview list
+        /// Load grid from found result set in batches to avoid hanging the application
         /// </summary>
-        private void LoadGrid()
+        private async Task LoadGrid()
         {
-            dataGrid.Rows.Clear();
-
-            foreach (var obj in gridObjects
-                .OrderBy(obj => obj.SearchKeyword)
-                .ThenByDescending(obj => obj.IsGuptaFile)
-                .ThenBy(obj => obj.FilePath)
-                .ThenBy(obj => obj.RowNumber))
+            await Task.Run(() =>
             {
-                dataGrid.Rows.Add(obj.SearchKeyword, obj.FileName, obj.RowNumber, obj.ObjectName, obj.ClassName, obj.Id);
-            }
+                var rowIndex = 0;
+                var maxIndex = 100;
+                HashSet<SearchResult> gridRowsBundle = new HashSet<SearchResult>();
+
+                //Clear grid on the main thread
+                this.Invoke((Action)(() =>
+                {
+                    dataGrid.Rows.Clear();
+                }));
+
+                foreach (SearchResult obj in gridObjects
+                    .OrderBy(obj => obj.SearchKeyword)
+                    .ThenByDescending(obj => obj.IsGuptaFile)
+                    .ThenBy(obj => obj.FilePath)
+                    .ThenBy(obj => obj.RowNumber))
+                {
+                    gridRowsBundle.Add(obj);
+                    rowIndex++;
+                    if (rowIndex >= maxIndex)
+                    {
+                        //Load a batch of results into grid to avoid stopping application
+                        this.Invoke((Action)(() =>
+                        {
+                            AddGridRows(gridRowsBundle);
+                        }));
+
+                        //Reset row index
+                        rowIndex = 0;
+                        //Clear batch set
+                        gridRowsBundle.Clear();
+                    }
+                }
+            })
+            .ConfigureAwait(false);
+        }
+        /// <summary>
+        /// Loads supplied rows into the grid
+        /// </summary>
+        /// <param name="gridRows"></param>
+        private void AddGridRows(IEnumerable<SearchResult> gridRows)
+        {
+            foreach(var row in gridRows)
+                dataGrid.Rows.Add(row.SearchKeyword, row.FileName, row.RowNumber, row.ObjectName, row.ClassName, row.Id);
         }
         /// <summary>
         /// Open the file after choosing the open button
