@@ -18,13 +18,13 @@ namespace SearchForFilesAndGuptaPlaces.Services
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        Task<String> GetResultPreview(SearchResult item, int linesToDisplay);
+        Task<String> GetResultPreviewAsync(SearchResult item, int linesToDisplay);
         /// <summary>
         /// Retrieves a list of files and their information inside a directory and its subsequent directiories
         /// </summary>
         /// <param name="startingDirectory"></param>
         /// <param name="fileFormats"></param>
         /// <returns></returns>
-        Task<IEnumerable<FileInfo>> GetFiles(string[] fileFormats, string startingDirectory);
+        Task<IEnumerable<FileInfo>> GetFilesAsync(string[] fileFormats, string startingDirectory);
     }
 }

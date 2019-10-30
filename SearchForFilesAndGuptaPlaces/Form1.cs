@@ -71,7 +71,7 @@ namespace SearchForFilesAndGuptaPlaces
             gridObjects.Clear();
 
             //Get files
-            var files = await fileSearchService.GetFiles(formatsTxt.Text.Split(','), directoryPathLbl.Text).ConfigureAwait(false);
+            var files = await fileSearchService.GetFilesAsync(formatsTxt.Text.Split(','), directoryPathLbl.Text).ConfigureAwait(false);
             //Go through files in parallel searching them
             var searchResultArrays = await Task.WhenAll(files.Select(f => fileSearchService.FindInFileAsync(f, searchTxt.Text.Split(separatorTextBox.Text[0]))).ToArray())
                 .ConfigureAwait(false);
@@ -230,7 +230,7 @@ namespace SearchForFilesAndGuptaPlaces
             //If a row has been selected and we want to see a result line
             if (dataGrid.SelectedRows.Count > 0 && searchUpDown.Value > 0)
                 result = await fileSearchService
-                    .GetResultPreview(gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID()), (int)searchUpDown.Value)
+                    .GetResultPreviewAsync(gridObjects.FirstOrDefault(g => g.Id == GetSelectedRowID()), (int)searchUpDown.Value)
                     .ConfigureAwait(false);
 
             this.Invoke((Action)(() => previewTextBox.Text = result));

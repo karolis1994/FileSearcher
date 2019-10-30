@@ -148,7 +148,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
                 .ConfigureAwait(false);
         }
 
-        public async Task<string> GetResultPreview(SearchResult item, int linesToDisplay)
+        public async Task<string> GetResultPreviewAsync(SearchResult item, int linesToDisplay)
         {
             return await Task.Run(() =>
                 {
@@ -182,7 +182,7 @@ namespace SearchForFilesAndGuptaPlaces.Services
                 .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<Models.FileInfo>> GetFiles(string[] fileFormats, string startingDirectory)
+        public async Task<IEnumerable<Models.FileInfo>> GetFilesAsync(string[] fileFormats, string startingDirectory)
         {
             if (!string.IsNullOrWhiteSpace(startingDirectory))
             {
