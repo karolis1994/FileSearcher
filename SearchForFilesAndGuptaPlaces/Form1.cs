@@ -143,6 +143,13 @@ namespace SearchForFilesAndGuptaPlaces
                         gridRowsBundle.Clear();
                     }
                 }
+
+                //Add the last batch
+                if (rowIndex != 0)
+                    this.Invoke((Action)(() =>
+                    {
+                        AddGridRows(gridRowsBundle);
+                    }));
             })
             .ConfigureAwait(false);
         }
